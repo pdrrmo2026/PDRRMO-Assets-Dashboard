@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+.npm
+
+# Build output
+dist/
+dist-ssr/
+build/
+
+# Environment variables (HUWAG i-commit ang file na ito!)
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor directories
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# TypeScript
+*.tsbuildinfo
