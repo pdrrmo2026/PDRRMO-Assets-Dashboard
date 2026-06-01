@@ -32,6 +32,11 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
 
   const agencyStats = getAgencyStats();
 
+  const getLGUName = (code: string) => {
+    const lgu = RIZAL_LGUS.find(l => l.code === code);
+    return lgu ? lgu.name : code;
+  };
+
   const generateCSV = (agencyCode: string) => {
     const agencyName = RIZAL_LGUS.find(l => l.code === agencyCode)?.name || 'All_Agencies';
     const timestamp = new Date().toISOString().split('T')[0];
@@ -46,9 +51,9 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
       
       if (filteredEquipment.length > 0) {
         rows.push(['=== EQUIPMENT INVENTORY ===']);
-        rows.push(['Name', 'Type', 'Quantity', 'Condition', 'Location', 'Agency', 'Coordinates', 'Date Added']);
+        rows.push(['Name', 'Type', 'Quantity', 'Condition', 'Location', 'Municipality', 'Agency Code', 'Coordinates', 'Date Added']);
         filteredEquipment.forEach(e => {
-          rows.push([e.name, e.type, e.quantity.toString(), e.condition, e.location, e.agency, `${e.lat}, ${e.lng}`, e.dateAdded]);
+          rows.push([e.name, e.type, e.quantity.toString(), e.condition, e.location, getLGUName(e.agency), e.agency, `${e.lat}, ${e.lng}`, e.dateAdded]);
         });
         rows.push([]);
       }
@@ -61,9 +66,9 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
       
       if (filteredVehicles.length > 0) {
         rows.push(['=== VEHICLE INVENTORY ===']);
-        rows.push(['Plate Number', 'Type', 'Brand', 'Model', 'Capacity', 'Condition', 'Location', 'Agency', 'Date Added']);
+        rows.push(['Plate Number', 'Type', 'Brand', 'Model', 'Capacity', 'Condition', 'Location', 'Municipality', 'Agency Code', 'Date Added']);
         filteredVehicles.forEach(v => {
-          rows.push([v.plateNumber, v.type, v.brand, v.model, v.capacity, v.condition, v.location, v.agency, v.dateAdded]);
+          rows.push([v.plateNumber, v.type, v.brand, v.model, v.capacity, v.condition, v.location, getLGUName(v.agency), v.agency, v.dateAdded]);
         });
         rows.push([]);
       }
@@ -76,9 +81,9 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
       
       if (filteredPersonnel.length > 0) {
         rows.push(['=== PERSONNEL DIRECTORY ===']);
-        rows.push(['Name', 'Position', 'Contact', 'Status', 'Agency', 'Trainings', 'HADR Team', 'Date Added']);
+        rows.push(['Name', 'Position', 'Contact', 'Status', 'Municipality', 'Agency Code', 'Trainings', 'HADR Team', 'Date Added']);
         filteredPersonnel.forEach(p => {
-          rows.push([p.name, p.position, p.contact, p.status, p.agency, p.trainings.join('; '), p.hadrTeam, p.dateAdded]);
+          rows.push([p.name, p.position, p.contact, p.status, getLGUName(p.agency), p.agency, p.trainings.join('; '), p.hadrTeam, p.dateAdded]);
         });
         rows.push([]);
       }
@@ -91,10 +96,10 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
       
       if (filteredACDV.length > 0) {
         rows.push(['=== ACCREDITED COMMUNITY DISASTER VOLUNTEERS (ACDV) ===']);
-        rows.push(['Organization', 'Office Address', 'Registered LGU', 'Personnel Count', 'Personnel Details']);
+        rows.push(['Organization', 'Office Address', 'Municipality', 'Registered LGU Code', 'Personnel Count', 'Personnel Details']);
         filteredACDV.forEach(a => {
           const personnelDetails = a.personnel.map(p => `${p.name} (${p.age}, ${p.gender}) - ${p.address}`).join(' | ');
-          rows.push([a.organizationName, a.officeAddress, a.registeredLGU, a.personnel.length.toString(), personnelDetails]);
+          rows.push([a.organizationName, a.officeAddress, getLGUName(a.registeredLGU), a.registeredLGU, a.personnel.length.toString(), personnelDetails]);
         });
       }
     }
@@ -282,7 +287,7 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
         ${filteredEquipment.length > 0 ? `
         <table>
           <thead>
-            <tr><th>Equipment Name</th><th>Type</th><th>Qty</th><th>Condition</th><th>Location</th></tr>
+            <tr><th>Equipment Name</th><th>Type</th><th>Qty</th><th>Condition</th><th>Location</th><th>Municipality</th></tr>
           </thead>
           <tbody>
             ${filteredEquipment.map(e => `
@@ -292,6 +297,7 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
                 <td>${e.quantity}</td>
                 <td><span class="badge badge-${e.condition.toLowerCase().replace(' ', '-')}">${e.condition}</span></td>
                 <td>${e.location}</td>
+                <td>${RIZAL_LGUS.find(l => l.code === e.agency)?.name || e.agency}</td>
               </tr>
             `).join('')}
           </tbody>
@@ -304,7 +310,7 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
         ${filteredVehicles.length > 0 ? `
         <table>
           <thead>
-            <tr><th>Plate Number</th><th>Type</th><th>Brand/Model</th><th>Condition</th><th>Location</th></tr>
+            <tr><th>Plate Number</th><th>Type</th><th>Brand/Model</th><th>Condition</th><th>Location</th><th>Municipality</th></tr>
           </thead>
           <tbody>
             ${filteredVehicles.map(v => `
@@ -314,6 +320,7 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
                 <td>${v.brand} ${v.model}</td>
                 <td><span class="badge badge-${v.condition.toLowerCase().replace(' ', '-')}">${v.condition}</span></td>
                 <td>${v.location}</td>
+                <td>${RIZAL_LGUS.find(l => l.code === v.agency)?.name || v.agency}</td>
               </tr>
             `).join('')}
           </tbody>
@@ -326,7 +333,7 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
         ${filteredPersonnel.length > 0 ? `
         <table>
           <thead>
-            <tr><th>Name</th><th>Position</th><th>Contact</th><th>Status</th><th>Trainings</th></tr>
+            <tr><th>Name</th><th>Position</th><th>Contact</th><th>Status</th><th>Municipality</th><th>Trainings</th></tr>
           </thead>
           <tbody>
             ${filteredPersonnel.map(p => `
@@ -335,6 +342,7 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
                 <td>${p.position}</td>
                 <td>${p.contact}</td>
                 <td><span class="badge badge-${p.status.toLowerCase().replace(' ', '-')}">${p.status}</span></td>
+                <td>${RIZAL_LGUS.find(l => l.code === p.agency)?.name || p.agency}</td>
                 <td>${p.trainings.join(', ')}</td>
               </tr>
             `).join('')}
@@ -348,14 +356,14 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
         ${filteredACDV.length > 0 ? `
         <table>
           <thead>
-            <tr><th>Organization</th><th>Office Address</th><th>Registered LGU</th><th>Members</th></tr>
+            <tr><th>Organization</th><th>Office Address</th><th>Municipality</th><th>Members</th></tr>
           </thead>
           <tbody>
             ${filteredACDV.map(a => `
               <tr>
                 <td>${a.organizationName}</td>
                 <td>${a.officeAddress}</td>
-                <td>${a.registeredLGU}</td>
+                <td>${RIZAL_LGUS.find(l => l.code === a.registeredLGU)?.name || a.registeredLGU}</td>
                 <td>${a.personnel.length}</td>
               </tr>
             `).join('')}
