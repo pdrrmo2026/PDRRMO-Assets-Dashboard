@@ -6,6 +6,7 @@ const EDIT_PASSWORD = 'pdrrmo0926';
 interface ACDVListProps {
   acdvData: ACDV[];
   onUpdate?: (updatedData: ACDV) => void;
+  onDelete?: (id: string) => void;
   currentUserLguCode: LGUCode;
   isAdmin: boolean;
 }
@@ -14,9 +15,11 @@ interface PasswordModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
+  title?: string;
+  message?: string;
 }
 
-function PasswordModal({ isOpen, onClose, onConfirm }: PasswordModalProps) {
+function PasswordModal({ isOpen, onClose, onConfirm, title = "Authentication Required", message = "Enter password to edit" }: PasswordModalProps) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
@@ -41,8 +44,8 @@ function PasswordModal({ isOpen, onClose, onConfirm }: PasswordModalProps) {
             <span className="text-2xl">🔒</span>
           </div>
           <div>
-            <h3 className="font-semibold text-gray-800">Authentication Required</h3>
-            <p className="text-sm text-gray-500">Enter password to edit</p>
+            <h3 className="font-semibold text-gray-800">{title}</h3>
+            <p className="text-sm text-gray-500">{message}</p>
           </div>
         </div>
         
@@ -82,12 +85,13 @@ function PasswordModal({ isOpen, onClose, onConfirm }: PasswordModalProps) {
   );
 }
 
-export default function ACDVList({ acdvData, onUpdate, currentUserLguCode, isAdmin }: ACDVListProps) {
+export default function ACDVList({ acdvData, onUpdate, onDelete, currentUserLguCode, isAdmin }: ACDVListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterLGU, setFilterLGU] = useState<string>(isAdmin ? 'all' : currentUserLguCode);
   const [selectedACDV, setSelectedACDV] = useState<ACDV | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordAction, setPasswordAction] = useState<'edit' | 'delete'>('edit');
   const [editFormData, setEditFormData] = useState<ACDV | null>(null);
   const [newPersonnel, setNewPersonnel] = useState({ name: '', age: 18, gender: 'Male' as const, address: '' });
 
@@ -122,12 +126,27 @@ export default function ACDVList({ acdvData, onUpdate, currentUserLguCode, isAdm
   };
 
   const handleEditClick = () => {
+    setPasswordAction('edit');
+    setShowPasswordModal(true);
+  };
+
+  const handleDeleteClick = () => {
+    setPasswordAction('delete');
     setShowPasswordModal(true);
   };
 
   const handlePasswordConfirmed = () => {
     setShowPasswordModal(false);
-    setIsEditing(true);
+    if (passwordAction === 'edit') {
+      setIsEditing(true);
+    } else if (passwordAction === 'delete') {
+      if (onDelete && selectedACDV) {
+        if (confirm(`Are you sure you want to delete the ACDV organization "${selectedACDV.organizationName}"?`)) {
+          onDelete(selectedACDV.id);
+          closeModal();
+        }
+      }
+    }
   };
 
   const handleSaveEdit = () => {
@@ -174,6 +193,8 @@ export default function ACDVList({ acdvData, onUpdate, currentUserLguCode, isAdm
         isOpen={showPasswordModal}
         onClose={() => setShowPasswordModal(false)}
         onConfirm={handlePasswordConfirmed}
+        title={passwordAction === 'delete' ? '⚠️ Deletion Required Admin Authorization' : '🔒 Authentication Required'}
+        message={passwordAction === 'delete' ? 'Enter Admin Password to delete this organization' : 'Enter Admin Password to edit this organization'}
       />
 
       {/* Detail Modal */}
@@ -232,9 +253,14 @@ export default function ACDVList({ acdvData, onUpdate, currentUserLguCode, isAdm
                     </div>
                   </div>
 
-                  <button onClick={handleEditClick} className="w-full mt-6 px-4 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 flex items-center justify-center gap-2 font-semibold">
-                    <span>🔒</span> Edit Organization
-                  </button>
+                  <div className="flex gap-3 mt-6 pt-4 border-t">
+                    <button onClick={handleEditClick} className="flex-1 px-4 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 flex items-center justify-center gap-2 font-semibold transition-colors">
+                      <span>🔒</span> Edit Organization
+                    </button>
+                    <button onClick={handleDeleteClick} className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center justify-center gap-2 font-semibold transition-colors">
+                      <span>🗑️</span> Delete Organization
+                    </button>
+                  </div>
                 </>
               ) : (
                 // Edit Mode - Full Form like Add Form

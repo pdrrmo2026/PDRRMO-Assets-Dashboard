@@ -4,7 +4,7 @@ import Dashboard from './components/Dashboard';
 import EquipmentForm from './components/EquipmentForm';
 import VehicleForm from './components/VehicleForm';
 import PersonnelForm from './components/PersonnelForm';
-import ResourceList from './components/ResourceList';
+import ResourceList, { PasswordModal } from './components/ResourceList';
 import GISMap from './components/GISMap';
 import AgencyDownloads from './components/AgencyDownloads';
 import ACDVForm from './components/ACDVForm';
@@ -12,10 +12,10 @@ import ACDVList from './components/ACDVList';
 import Login from './components/Login';
 import { Equipment, Vehicle, Personnel, ACDV, TabType, LGUCode } from './types';
 import {
-  fetchEquipment, insertEquipment, updateEquipmentInDB,
-  fetchVehicles, insertVehicle, updateVehicleInDB,
-  fetchPersonnel, insertPersonnel, updatePersonnelInDB,
-  fetchACDV, insertACDV, updateACDVInDB,
+  fetchEquipment, insertEquipment, updateEquipmentInDB, deleteEquipment,
+  fetchVehicles, insertVehicle, updateVehicleInDB, deleteVehicle,
+  fetchPersonnel, insertPersonnel, updatePersonnelInDB, deletePersonnel,
+  fetchACDV, insertACDV, updateACDVInDB, deleteACDV,
 } from './lib/db';
 
 export default function App() {
@@ -30,6 +30,10 @@ export default function App() {
   const [acdvData, setACDVData] = useState<ACDV[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+
+  // Add confirmation states
+  const [showAddPasswordModal, setShowAddPasswordModal] = useState(false);
+  const [pendingAddAction, setPendingAddAction] = useState<{ type: 'equipment' | 'vehicle' | 'personnel' | 'acdv', data: any } | null>(null);
 
   // ── Persist session ──────────────────────────────────────────
   useEffect(() => {
@@ -87,41 +91,50 @@ export default function App() {
     localStorage.removeItem('currentUserLguCode');
   };
 
-  // ── Add handlers (save to Supabase + update local state) ──────
-  const addEquipment = async (item: Omit<Equipment, 'id' | 'dateAdded'>) => {
+  // ── Add Handlers (intercepted with password check) ──────────
+  const executePendingAdd = async () => {
+    if (!pendingAddAction) return;
+    const { type, data } = pendingAddAction;
+    setShowAddPasswordModal(false);
+    setPendingAddAction(null);
+
     try {
-      const saved = await insertEquipment(item);
-      setEquipment((prev) => [saved, ...prev]);
+      if (type === 'equipment') {
+        const saved = await insertEquipment(data);
+        setEquipment((prev) => [saved, ...prev]);
+      } else if (type === 'vehicle') {
+        const saved = await insertVehicle(data);
+        setVehicles((prev) => [saved, ...prev]);
+      } else if (type === 'personnel') {
+        const saved = await insertPersonnel(data);
+        setPersonnel((prev) => [saved, ...prev]);
+      } else if (type === 'acdv') {
+        const saved = await insertACDV(data);
+        setACDVData((prev) => [saved, ...prev]);
+      }
     } catch (err: any) {
-      alert('Error saving equipment: ' + (err?.message ?? err));
+      alert(`Error saving ${type}: ` + (err?.message ?? err));
     }
   };
 
-  const addVehicle = async (item: Omit<Vehicle, 'id' | 'dateAdded'>) => {
-    try {
-      const saved = await insertVehicle(item);
-      setVehicles((prev) => [saved, ...prev]);
-    } catch (err: any) {
-      alert('Error saving vehicle: ' + (err?.message ?? err));
-    }
+  const addEquipment = (item: Omit<Equipment, 'id' | 'dateAdded'>) => {
+    setPendingAddAction({ type: 'equipment', data: item });
+    setShowAddPasswordModal(true);
   };
 
-  const addPersonnel = async (item: Omit<Personnel, 'id' | 'dateAdded'>) => {
-    try {
-      const saved = await insertPersonnel(item);
-      setPersonnel((prev) => [saved, ...prev]);
-    } catch (err: any) {
-      alert('Error saving personnel: ' + (err?.message ?? err));
-    }
+  const addVehicle = (item: Omit<Vehicle, 'id' | 'dateAdded'>) => {
+    setPendingAddAction({ type: 'vehicle', data: item });
+    setShowAddPasswordModal(true);
   };
 
-  const addACDV = async (item: Omit<ACDV, 'id' | 'dateAdded'>) => {
-    try {
-      const saved = await insertACDV(item);
-      setACDVData((prev) => [saved, ...prev]);
-    } catch (err: any) {
-      alert('Error saving ACDV: ' + (err?.message ?? err));
-    }
+  const addPersonnel = (item: Omit<Personnel, 'id' | 'dateAdded'>) => {
+    setPendingAddAction({ type: 'personnel', data: item });
+    setShowAddPasswordModal(true);
+  };
+
+  const addACDV = (item: Omit<ACDV, 'id' | 'dateAdded'>) => {
+    setPendingAddAction({ type: 'acdv', data: item });
+    setShowAddPasswordModal(true);
   };
 
   // ── Update handlers (save edits to Supabase + update local state) ──
@@ -158,6 +171,42 @@ export default function App() {
       setACDVData((prev) => prev.map((item) => item.id === saved.id ? saved : item));
     } catch (err: any) {
       alert('Error updating ACDV: ' + (err?.message ?? err));
+    }
+  };
+
+  const deleteEquipmentItem = async (id: string) => {
+    try {
+      await deleteEquipment(id);
+      setEquipment((prev) => prev.filter((item) => item.id !== id));
+    } catch (err: any) {
+      alert('Error deleting equipment: ' + (err?.message ?? err));
+    }
+  };
+
+  const deleteVehicleItem = async (id: string) => {
+    try {
+      await deleteVehicle(id);
+      setVehicles((prev) => prev.filter((item) => item.id !== id));
+    } catch (err: any) {
+      alert('Error deleting vehicle: ' + (err?.message ?? err));
+    }
+  };
+
+  const deletePersonnelItem = async (id: string) => {
+    try {
+      await deletePersonnel(id);
+      setPersonnel((prev) => prev.filter((item) => item.id !== id));
+    } catch (err: any) {
+      alert('Error deleting personnel: ' + (err?.message ?? err));
+    }
+  };
+
+  const deleteACDVItem = async (id: string) => {
+    try {
+      await deleteACDV(id);
+      setACDVData((prev) => prev.filter((item) => item.id !== id));
+    } catch (err: any) {
+      alert('Error deleting ACDV: ' + (err?.message ?? err));
     }
   };
 
@@ -201,11 +250,11 @@ export default function App() {
       case 'personnel-form':
         return <PersonnelForm onSubmit={addPersonnel} currentUserLguCode={currentUserLguCode} isAdmin={isAdmin} />;
       case 'equipment-list':
-        return <ResourceList type="equipment" data={equipment} onUpdate={updateEquipment} currentUserLguCode={currentUserLguCode} isAdmin={isAdmin} />;
+        return <ResourceList type="equipment" data={equipment} onUpdate={updateEquipment} onDelete={deleteEquipmentItem} currentUserLguCode={currentUserLguCode} isAdmin={isAdmin} />;
       case 'vehicle-list':
-        return <ResourceList type="vehicles" data={vehicles} onUpdate={updateVehicle} currentUserLguCode={currentUserLguCode} isAdmin={isAdmin} />;
+        return <ResourceList type="vehicles" data={vehicles} onUpdate={updateVehicle} onDelete={deleteVehicleItem} currentUserLguCode={currentUserLguCode} isAdmin={isAdmin} />;
       case 'personnel-list':
-        return <ResourceList type="personnel" data={personnel} onUpdate={updatePersonnel} currentUserLguCode={currentUserLguCode} isAdmin={isAdmin} />;
+        return <ResourceList type="personnel" data={personnel} onUpdate={updatePersonnel} onDelete={deletePersonnelItem} currentUserLguCode={currentUserLguCode} isAdmin={isAdmin} />;
       case 'gis-map':
         return <GISMap equipment={equipment} vehicles={vehicles} personnel={personnel} acdvData={acdvData} />;
       case 'agency-downloads':
@@ -213,7 +262,7 @@ export default function App() {
       case 'acdv-form':
         return <ACDVForm onSubmit={addACDV} currentUserLguCode={currentUserLguCode} isAdmin={isAdmin} />;
       case 'acdv-list':
-        return <ACDVList acdvData={acdvData} onUpdate={updateACDV} currentUserLguCode={currentUserLguCode} isAdmin={isAdmin} />;
+        return <ACDVList acdvData={acdvData} onUpdate={updateACDV} onDelete={deleteACDVItem} currentUserLguCode={currentUserLguCode} isAdmin={isAdmin} />;
       default:
         return <Dashboard equipment={equipment} vehicles={vehicles} personnel={personnel} />;
     }
@@ -225,6 +274,16 @@ export default function App() {
 
   return (
     <div className="flex h-screen bg-gray-100">
+      <PasswordModal
+        isOpen={showAddPasswordModal}
+        onClose={() => {
+          setShowAddPasswordModal(false);
+          setPendingAddAction(null);
+        }}
+        onConfirm={executePendingAdd}
+        title="⚠️ Action Required Admin Authorization"
+        message="Enter Admin Password to add this new entry to database"
+      />
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} currentUser={currentUser} isAdmin={isAdmin} onLogout={handleLogout} />
       <main className="flex-1 overflow-auto">
         <div className="p-6">

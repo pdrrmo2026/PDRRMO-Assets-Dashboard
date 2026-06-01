@@ -52,12 +52,11 @@ const hadrTeams = [
 ];
 
 const conditions = ['Good', 'Fair', 'Poor', 'Needs Repair', 'Under Repair'];
-const statuses = ['Active', 'On Leave', 'Deployed'];
-
-interface ResourceListProps {
+const statuses = ['Active', 'On Leave', 'Deployed'];interface ResourceListProps {
   type: 'equipment' | 'vehicles' | 'personnel';
   data: Equipment[] | Vehicle[] | Personnel[];
   onUpdate?: (updatedData: any) => void;
+  onDelete?: (id: string) => void;
   currentUserLguCode: LGUCode;
   isAdmin: boolean;
 }
@@ -66,9 +65,11 @@ interface PasswordModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
+  title?: string;
+  message?: string;
 }
 
-function PasswordModal({ isOpen, onClose, onConfirm }: PasswordModalProps) {
+export function PasswordModal({ isOpen, onClose, onConfirm, title = "Authentication Required", message = "Enter password to edit" }: PasswordModalProps) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
@@ -93,8 +94,8 @@ function PasswordModal({ isOpen, onClose, onConfirm }: PasswordModalProps) {
             <span className="text-2xl">🔒</span>
           </div>
           <div>
-            <h3 className="font-semibold text-gray-800">Authentication Required</h3>
-            <p className="text-sm text-gray-500">Enter password to edit</p>
+            <h3 className="font-semibold text-gray-800">{title}</h3>
+            <p className="text-sm text-gray-500">{message}</p>
           </div>
         </div>
         
@@ -134,13 +135,14 @@ function PasswordModal({ isOpen, onClose, onConfirm }: PasswordModalProps) {
   );
 }
 
-export default function ResourceList({ type, data, onUpdate, currentUserLguCode, isAdmin }: ResourceListProps) {
+export default function ResourceList({ type, data, onUpdate, onDelete, currentUserLguCode, isAdmin }: ResourceListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterAgency, setFilterAgency] = useState<string>(isAdmin ? 'all' : currentUserLguCode);
   const [filterCondition, setFilterCondition] = useState<string>('all');
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordAction, setPasswordAction] = useState<'edit' | 'delete'>('edit');
   const [editFormData, setEditFormData] = useState<any>({});
   const [customTraining, setCustomTraining] = useState('');
 
@@ -204,12 +206,27 @@ export default function ResourceList({ type, data, onUpdate, currentUserLguCode,
   };
 
   const handleEditClick = () => {
+    setPasswordAction('edit');
+    setShowPasswordModal(true);
+  };
+
+  const handleDeleteClick = () => {
+    setPasswordAction('delete');
     setShowPasswordModal(true);
   };
 
   const handlePasswordConfirmed = () => {
     setShowPasswordModal(false);
-    setIsEditing(true);
+    if (passwordAction === 'edit') {
+      setIsEditing(true);
+    } else if (passwordAction === 'delete') {
+      if (onDelete && selectedItem) {
+        if (confirm(`Are you sure you want to delete this ${type === 'equipment' ? 'equipment' : type === 'vehicles' ? 'vehicle' : 'personnel'}?`)) {
+          onDelete(selectedItem.id);
+          closeModal();
+        }
+      }
+    }
   };
 
   const handleSaveEdit = () => {
@@ -714,9 +731,14 @@ export default function ResourceList({ type, data, onUpdate, currentUserLguCode,
                   </>
                 )}
 
-                <button onClick={handleEditClick} className="w-full mt-4 px-4 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 flex items-center justify-center gap-2 font-semibold">
-                  <span>🔒</span> Edit Entry
-                </button>
+                <div className="flex gap-3 mt-6 pt-4 border-t">
+                  <button onClick={handleEditClick} className="flex-1 px-4 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 flex items-center justify-center gap-2 font-semibold transition-colors">
+                    <span>🔒</span> Edit Entry
+                  </button>
+                  <button onClick={handleDeleteClick} className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center justify-center gap-2 font-semibold transition-colors">
+                    <span>🗑️</span> Delete Entry
+                  </button>
+                </div>
               </div>
             ) : (
               // Edit Mode - Full Form like Add Form
@@ -748,6 +770,8 @@ export default function ResourceList({ type, data, onUpdate, currentUserLguCode,
         isOpen={showPasswordModal}
         onClose={() => setShowPasswordModal(false)}
         onConfirm={handlePasswordConfirmed}
+        title={passwordAction === 'delete' ? '⚠️ Deletion Required Admin Authorization' : '🔒 Authentication Required'}
+        message={passwordAction === 'delete' ? 'Enter Admin Password to delete this entry' : 'Enter Admin Password to edit this entry'}
       />
 
       {renderDetailModal()}
