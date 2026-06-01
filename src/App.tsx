@@ -117,24 +117,40 @@ export default function App() {
     }
   };
 
-  const addEquipment = (item: Omit<Equipment, 'id' | 'dateAdded'>) => {
-    setPendingAddAction({ type: 'equipment', data: item });
-    setShowAddPasswordModal(true);
+  const addEquipment = async (item: Omit<Equipment, 'id' | 'dateAdded'>) => {
+    try {
+      const saved = await insertEquipment(item);
+      setEquipment((prev) => [saved, ...prev]);
+    } catch (err: any) {
+      alert(`Error saving equipment: ` + (err?.message ?? err));
+    }
   };
 
-  const addVehicle = (item: Omit<Vehicle, 'id' | 'dateAdded'>) => {
-    setPendingAddAction({ type: 'vehicle', data: item });
-    setShowAddPasswordModal(true);
+  const addVehicle = async (item: Omit<Vehicle, 'id' | 'dateAdded'>) => {
+    try {
+      const saved = await insertVehicle(item);
+      setVehicles((prev) => [saved, ...prev]);
+    } catch (err: any) {
+      alert(`Error saving vehicle: ` + (err?.message ?? err));
+    }
   };
 
-  const addPersonnel = (item: Omit<Personnel, 'id' | 'dateAdded'>) => {
-    setPendingAddAction({ type: 'personnel', data: item });
-    setShowAddPasswordModal(true);
+  const addPersonnel = async (item: Omit<Personnel, 'id' | 'dateAdded'>) => {
+    try {
+      const saved = await insertPersonnel(item);
+      setPersonnel((prev) => [saved, ...prev]);
+    } catch (err: any) {
+      alert(`Error saving personnel: ` + (err?.message ?? err));
+    }
   };
 
-  const addACDV = (item: Omit<ACDV, 'id' | 'dateAdded'>) => {
-    setPendingAddAction({ type: 'acdv', data: item });
-    setShowAddPasswordModal(true);
+  const addACDV = async (item: Omit<ACDV, 'id' | 'dateAdded'>) => {
+    try {
+      const saved = await insertACDV(item);
+      setACDVData((prev) => [saved, ...prev]);
+    } catch (err: any) {
+      alert(`Error saving acdv: ` + (err?.message ?? err));
+    }
   };
 
   // ── Update handlers (save edits to Supabase + update local state) ──
