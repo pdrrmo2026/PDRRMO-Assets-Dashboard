@@ -384,7 +384,7 @@ export default function ResourceList({ type, data, onUpdate, onDelete, currentUs
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Vehicle Type <span className="text-red-500">*</span></label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Vehicle Type</label>
           <select 
             value={editFormData.type || ''} 
             onChange={(e) => setEditFormData({ ...editFormData, type: e.target.value })}
@@ -397,7 +397,7 @@ export default function ResourceList({ type, data, onUpdate, onDelete, currentUs
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Brand <span className="text-red-500">*</span></label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Brand</label>
           <input 
             type="text" 
             value={editFormData.brand || ''} 
@@ -407,7 +407,7 @@ export default function ResourceList({ type, data, onUpdate, onDelete, currentUs
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Model <span className="text-red-500">*</span></label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Model</label>
           <input 
             type="text" 
             value={editFormData.model || ''} 
@@ -451,7 +451,7 @@ export default function ResourceList({ type, data, onUpdate, onDelete, currentUs
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">LGU / Agency <span className="text-red-500">*</span></label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">LGU / Agency</label>
           <select 
             value={editFormData.agency || 'ANTIPOLO'} 
             onChange={(e) => setEditFormData({ ...editFormData, agency: e.target.value })}
@@ -462,7 +462,7 @@ export default function ResourceList({ type, data, onUpdate, onDelete, currentUs
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Current Location <span className="text-red-500">*</span></label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Current Location</label>
           <input 
             type="text" 
             value={editFormData.location || ''} 

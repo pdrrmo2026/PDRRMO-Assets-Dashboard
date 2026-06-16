@@ -50,18 +50,12 @@ export default function VehicleForm({ onSubmit, currentUserLguCode, isAdmin }: V
   };
 
   const handleSubmit = (e: React.FormEvent) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  // 🔥 ADD THIS VALIDATION
-  if (!formData.plateNumber || formData.plateNumber.trim() === '') {
-    alert("Required ang Plate Number");
-    return;
-  }
-
-  onSubmit({
-    ...formData,
-    plateNumber: formData.plateNumber.trim(),
-  });
+    onSubmit({
+      ...formData,
+      plateNumber: formData.plateNumber.trim(),
+    });
 
   setSubmitted(true);
   setTimeout(() => setSubmitted(false), 3000);
