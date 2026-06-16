@@ -50,25 +50,38 @@ export default function VehicleForm({ onSubmit, currentUserLguCode, isAdmin }: V
   };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit(formData);
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 3000);
-    const defaultLgu = RIZAL_LGUS.find(l => l.code === currentUserLguCode) || RIZAL_LGUS[0];
-    setFormData({
-      plateNumber: '',
-      type: '',
-      brand: '',
-      model: '',
-      capacity: '',
-      quantity: 1,
-      condition: 'Good',
-      location: '',
-      lat: defaultLgu.lat,
-      lng: defaultLgu.lng,
-      agency: currentUserLguCode as Vehicle['agency'],
-    });
-  };
+  e.preventDefault();
+
+  // 🔥 ADD THIS VALIDATION
+  if (!formData.plateNumber || formData.plateNumber.trim() === '') {
+    alert("Required ang Plate Number");
+    return;
+  }
+
+  onSubmit({
+    ...formData,
+    plateNumber: formData.plateNumber.trim(),
+  });
+
+  setSubmitted(true);
+  setTimeout(() => setSubmitted(false), 3000);
+
+  const defaultLgu = RIZAL_LGUS.find(l => l.code === currentUserLguCode) || RIZAL_LGUS[0];
+
+  setFormData({
+    plateNumber: '',
+    type: '',
+    brand: '',
+    model: '',
+    capacity: '',
+    quantity: 1,
+    condition: 'Good',
+    location: '',
+    lat: defaultLgu.lat,
+    lng: defaultLgu.lng,
+    agency: currentUserLguCode as Vehicle['agency'],
+  });
+};
 
   return (
     <div className="max-w-3xl mx-auto">
