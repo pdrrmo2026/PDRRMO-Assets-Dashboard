@@ -41,7 +41,7 @@ function mapEquipmentToDB(item: Omit<Equipment, 'id' | 'dateAdded'>) {
 function mapVehicleFromDB(row: any): Vehicle {
   return {
     id: row.id,
-    plateNumber: row.plate_number,
+    plateNumber: row.plate_number || '',
     type: row.type,
     brand: row.brand,
     model: row.model,
@@ -58,7 +58,7 @@ function mapVehicleFromDB(row: any): Vehicle {
 
 function mapVehicleToDB(item: Omit<Vehicle, 'id' | 'dateAdded'>) {
   return {
-    plate_number: item.plateNumber,
+    plate_number: item.plateNumber?.trim() ? item.plateNumber.trim() : null,
     type: item.type,
     brand: item.brand,
     model: item.model,

@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS equipment (
 
 CREATE TABLE IF NOT EXISTS vehicles (
   id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  plate_number  TEXT NOT NULL UNIQUE,
+  plate_number  TEXT UNIQUE,
   type          TEXT NOT NULL,
   brand         TEXT NOT NULL,
   model         TEXT NOT NULL,
