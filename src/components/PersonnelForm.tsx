@@ -179,11 +179,10 @@ export default function PersonnelForm({ onSubmit, currentUserLguCode, isAdmin }:
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Full Name <span className="text-red-500">*</span>
+              Full Name
             </label>
             <input
               type="text"
-              required
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -193,10 +192,9 @@ export default function PersonnelForm({ onSubmit, currentUserLguCode, isAdmin }:
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Position <span className="text-red-500">*</span>
+              Position
             </label>
             <select
-              required
               value={formData.position}
               onChange={(e) => setFormData({ ...formData, position: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -244,11 +242,10 @@ export default function PersonnelForm({ onSubmit, currentUserLguCode, isAdmin }:
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Contact Number <span className="text-red-500">*</span>
+              Contact Number
             </label>
             <input
               type="text"
-              required
               value={formData.contact}
               onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"

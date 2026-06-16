@@ -128,10 +128,9 @@ export default function EquipmentForm({ onSubmit, currentUserLguCode, isAdmin }:
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Condition <span className="text-red-500">*</span>
+              Condition
             </label>
             <select
-              required
               value={formData.condition}
               onChange={(e) => setFormData({ ...formData, condition: e.target.value as Equipment['condition'] })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -187,32 +186,6 @@ export default function EquipmentForm({ onSubmit, currentUserLguCode, isAdmin }:
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="e.g., Municipal Warehouse, Bodega A"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Latitude
-            </label>
-            <input
-              type="number"
-              step="0.0001"
-              value={formData.lat}
-              onChange={(e) => setFormData({ ...formData, lat: parseFloat(e.target.value) || 0 })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Longitude
-            </label>
-            <input
-              type="number"
-              step="0.0001"
-              value={formData.lng}
-              onChange={(e) => setFormData({ ...formData, lng: parseFloat(e.target.value) || 0 })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50"
             />
           </div>
         </div>
