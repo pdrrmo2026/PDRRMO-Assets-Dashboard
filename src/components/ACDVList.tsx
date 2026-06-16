@@ -227,7 +227,7 @@ export default function ACDVList({ acdvData, onUpdate, onDelete, currentUserLguC
                 <>
                   <div className="space-y-4 mb-6">
                     <div className="bg-gray-50 rounded-lg p-4"><p className="text-gray-500 text-sm">Office Address</p><p className="font-semibold">{selectedACDV.officeAddress}</p></div>
-                    <div className="bg-gray-50 rounded-lg p-4"><p className="text-gray-500 text-sm">Registered LGU</p><span className={`inline-block px-3 py-1 rounded-full text-sm mt-1 ${RIZAL_LGUS.find(l => l.code === selectedACDV.registeredLGU)?.type === 'provincial' ? 'bg-purple-100 text-purple-700' : RIZAL_LGUS.find(l => l.code === selectedACDV.registeredLGU)?.type === 'city' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>{getLGUName(selectedACDV.registeredLGU)}</span></div>
+                    <div className="bg-gray-50 rounded-lg p-4"><p className="text-gray-500 text-sm">Registered LGU/AGENCY</p><span className={`inline-block px-3 py-1 rounded-full text-sm mt-1 ${RIZAL_LGUS.find(l => l.code === selectedACDV.registeredLGU)?.type === 'provincial' ? 'bg-purple-100 text-purple-700' : RIZAL_LGUS.find(l => l.code === selectedACDV.registeredLGU)?.type === 'city' ? 'bg-blue-100 text-blue-700' : RIZAL_LGUS.find(l => l.code === selectedACDV.registeredLGU)?.type === 'agency' ? 'bg-indigo-100 text-indigo-700' : 'bg-green-100 text-green-700'}`}>{getLGUName(selectedACDV.registeredLGU)}</span></div>
                     <div className="bg-gray-50 rounded-lg p-4"><p className="text-gray-500 text-sm">Date Registered</p><p className="font-semibold">{selectedACDV.dateAdded}</p></div>
                   </div>
 
@@ -281,7 +281,7 @@ export default function ACDVList({ acdvData, onUpdate, onDelete, currentUserLguC
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Registered LGU <span className="text-red-500">*</span></label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Registered LGU/AGENCY <span className="text-red-500">*</span></label>
                         <select 
                           value={editFormData.registeredLGU}
                           onChange={(e) => setEditFormData({ ...editFormData, registeredLGU: e.target.value as any })}
@@ -473,14 +473,14 @@ export default function ACDVList({ acdvData, onUpdate, onDelete, currentUserLguC
             <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Search organization or personnel..." className="w-full px-4 py-2 border border-gray-300 rounded-lg" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Registered LGU</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Registered LGU/AGENCY</label>
             <select 
               value={filterLGU} 
               onChange={(e) => setFilterLGU(e.target.value)} 
               disabled={!isAdmin}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
             >
-              <option value="all">All LGUs</option>
+              <option value="all">All LGU/Agencies</option>
               {RIZAL_LGUS.map(lgu => <option key={lgu.code} value={lgu.code}>{lgu.name}</option>)}
             </select>
           </div>
@@ -505,7 +505,7 @@ export default function ACDVList({ acdvData, onUpdate, onDelete, currentUserLguC
                       <h3 className="text-lg font-semibold text-gray-800">{acdv.organizationName}</h3>
                       <p className="text-gray-500 text-sm mt-1">📍 {acdv.officeAddress}</p>
                       <div className="flex items-center gap-3 mt-2">
-                        <span className={`px-3 py-1 rounded-full text-xs ${lgu?.type === 'provincial' ? 'bg-purple-100 text-purple-700' : lgu?.type === 'city' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>Registered: {getLGUName(acdv.registeredLGU)}</span>
+                        <span className={`px-3 py-1 rounded-full text-xs ${lgu?.type === 'provincial' ? 'bg-purple-100 text-purple-700' : lgu?.type === 'city' ? 'bg-blue-100 text-blue-700' : lgu?.type === 'agency' ? 'bg-indigo-100 text-indigo-700' : 'bg-green-100 text-green-700'}`}>Registered: {getLGUName(acdv.registeredLGU)}</span>
                         <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs">{acdv.personnel.length} Member{acdv.personnel.length !== 1 ? 's' : ''}</span>
                       </div>
                     </div>

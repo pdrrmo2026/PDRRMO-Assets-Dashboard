@@ -168,6 +168,11 @@ export default function EquipmentForm({ onSubmit, currentUserLguCode, isAdmin }:
                   <option key={lgu.code} value={lgu.code}>{lgu.name}</option>
                 ))}
               </optgroup>
+              <optgroup label="Agencies">
+                {RIZAL_LGUS.filter(l => l.type === 'agency').map(lgu => (
+                  <option key={lgu.code} value={lgu.code}>{lgu.name}</option>
+                ))}
+              </optgroup>
             </select>
           </div>
 

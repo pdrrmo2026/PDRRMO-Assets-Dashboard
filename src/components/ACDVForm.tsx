@@ -104,7 +104,7 @@ export default function ACDVForm({ onSubmit, currentUserLguCode, isAdmin }: ACDV
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Registered LGU <span className="text-red-500">*</span>
+                Registered LGU/AGENCY <span className="text-red-500">*</span>
               </label>
               <select
                 required
@@ -125,6 +125,11 @@ export default function ACDVForm({ onSubmit, currentUserLguCode, isAdmin }: ACDV
                 </optgroup>
                 <optgroup label="Municipalities">
                   {RIZAL_LGUS.filter(l => l.type === 'municipality').map(lgu => (
+                    <option key={lgu.code} value={lgu.code}>{lgu.name}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="Agencies">
+                  {RIZAL_LGUS.filter(l => l.type === 'agency').map(lgu => (
                     <option key={lgu.code} value={lgu.code}>{lgu.name}</option>
                   ))}
                 </optgroup>

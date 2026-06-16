@@ -15,6 +15,12 @@ export const RIZAL_LGUS = [
   { code: 'TANAY', name: 'Municipality of Tanay', type: 'municipality', lat: 14.4972, lng: 121.2864 },
   { code: 'TAYTAY', name: 'Municipality of Taytay', type: 'municipality', lat: 14.5569, lng: 121.1339 },
   { code: 'TERESA', name: 'Municipality of Teresa', type: 'municipality', lat: 14.5614, lng: 121.1919 },
+  { code: 'BFP_RIZAL', name: 'BFP-RIZAL', type: 'agency', lat: 14.6042, lng: 121.1681 },
+  { code: 'PCG_RIZAL', name: 'PCG-RIZAL', type: 'agency', lat: 14.6042, lng: 121.1681 },
+  { code: 'IB_80TH', name: '80th IB-2 ID', type: 'agency', lat: 14.6042, lng: 121.1681 },
+  { code: 'PNP_RIZAL', name: 'PNP-RIZAL', type: 'agency', lat: 14.6042, lng: 121.1681 },
+  { code: 'DPWH_DEO1', name: 'DPWH DEO I', type: 'agency', lat: 14.6042, lng: 121.1681 },
+  { code: 'DPWH_DEO2', name: 'DPWH DEO II', type: 'agency', lat: 14.6042, lng: 121.1681 },
 ] as const;
 
 export type LGUCode = typeof RIZAL_LGUS[number]['code'];
