@@ -208,10 +208,9 @@ export default function PersonnelForm({ onSubmit, currentUserLguCode, isAdmin }:
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              LGU / Agency <span className="text-red-500">*</span>
+              LGU / Agency
             </label>
             <select
-              required
               value={formData.agency}
               onChange={(e) => handleAgencyChange(e.target.value)}
               disabled={!isAdmin}
@@ -255,10 +254,9 @@ export default function PersonnelForm({ onSubmit, currentUserLguCode, isAdmin }:
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Status <span className="text-red-500">*</span>
+              Status
             </label>
             <select
-              required
               value={formData.status}
               onChange={(e) => setFormData({ ...formData, status: e.target.value as Personnel['status'] })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -271,10 +269,9 @@ export default function PersonnelForm({ onSubmit, currentUserLguCode, isAdmin }:
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              HADR Team <span className="text-red-500">*</span>
+              HADR Team
             </label>
             <select
-              required
               value={formData.hadrTeam}
               onChange={(e) => setFormData({ ...formData, hadrTeam: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"

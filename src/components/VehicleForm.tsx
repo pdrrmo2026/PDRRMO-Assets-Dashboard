@@ -99,10 +99,9 @@ export default function VehicleForm({ onSubmit, currentUserLguCode, isAdmin }: V
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Vehicle Type <span className="text-red-500">*</span>
+              Vehicle Type
             </label>
             <select
-              required
               value={formData.type}
               onChange={(e) => setFormData({ ...formData, type: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -116,11 +115,10 @@ export default function VehicleForm({ onSubmit, currentUserLguCode, isAdmin }: V
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Brand <span className="text-red-500">*</span>
+              Brand
             </label>
             <input
               type="text"
-              required
               value={formData.brand}
               onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -143,11 +141,10 @@ export default function VehicleForm({ onSubmit, currentUserLguCode, isAdmin }: V
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Capacity <span className="text-red-500">*</span>
+              Capacity
             </label>
             <input
               type="text"
-              required
               value={formData.capacity}
               onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -157,10 +154,9 @@ export default function VehicleForm({ onSubmit, currentUserLguCode, isAdmin }: V
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Condition <span className="text-red-500">*</span>
+              Condition
             </label>
             <select
-              required
               value={formData.condition}
               onChange={(e) => setFormData({ ...formData, condition: e.target.value as Vehicle['condition'] })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -173,10 +169,9 @@ export default function VehicleForm({ onSubmit, currentUserLguCode, isAdmin }: V
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              LGU / Agency <span className="text-red-500">*</span>
+              LGU / Agency
             </label>
             <select
-              required
               value={formData.agency}
               onChange={(e) => handleAgencyChange(e.target.value)}
               disabled={!isAdmin}
@@ -207,17 +202,17 @@ export default function VehicleForm({ onSubmit, currentUserLguCode, isAdmin }: V
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Current Location <span className="text-red-500">*</span>
+              Current Location
             </label>
             <input
               type="text"
-              required
               value={formData.location}
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="e.g., Municipal Garage, Fire Station"
             />
           </div>
+
         </div>
 
         <div className="flex justify-end gap-3 pt-4 border-t">

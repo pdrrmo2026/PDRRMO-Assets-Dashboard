@@ -83,11 +83,10 @@ export default function EquipmentForm({ onSubmit, currentUserLguCode, isAdmin }:
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Equipment Name <span className="text-red-500">*</span>
+              Equipment Name
             </label>
             <input
               type="text"
-              required
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -97,10 +96,9 @@ export default function EquipmentForm({ onSubmit, currentUserLguCode, isAdmin }:
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Equipment Type <span className="text-red-500">*</span>
+              Equipment Type
             </label>
             <select
-              required
               value={formData.type}
               onChange={(e) => setFormData({ ...formData, type: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -114,11 +112,10 @@ export default function EquipmentForm({ onSubmit, currentUserLguCode, isAdmin }:
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Quantity <span className="text-red-500">*</span>
+              Quantity
             </label>
             <input
               type="number"
-              required
               min="1"
               value={formData.quantity}
               onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 1 })}
@@ -143,10 +140,9 @@ export default function EquipmentForm({ onSubmit, currentUserLguCode, isAdmin }:
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              LGU / Agency <span className="text-red-500">*</span>
+              LGU / Agency
             </label>
             <select
-              required
               value={formData.agency}
               onChange={(e) => handleAgencyChange(e.target.value)}
               disabled={!isAdmin}
@@ -177,17 +173,17 @@ export default function EquipmentForm({ onSubmit, currentUserLguCode, isAdmin }:
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Storage Location <span className="text-red-500">*</span>
+              Storage Location
             </label>
             <input
               type="text"
-              required
               value={formData.location}
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="e.g., Municipal Warehouse, Bodega A"
             />
           </div>
+
         </div>
 
         <div className="flex justify-end gap-3 pt-4 border-t">
