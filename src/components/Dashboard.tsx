@@ -9,16 +9,16 @@ interface DashboardProps {
 export default function Dashboard({ equipment, vehicles, personnel }: DashboardProps) {
   const totalEquipment = equipment.reduce((sum, e) => sum + e.quantity, 0);
   const activePersonnel = personnel.filter(p => p.status === 'Active').length;
-  const goodConditionVehicles = vehicles.filter(v => v.condition === 'Good').length;
+  const goodConditionVehicles = vehicles.filter(v => v.condition === 'Good').reduce((sum, v) => sum + (v.quantity || 1), 0);
 
   // Group by LGU
   const pdrEquipment = equipment.filter(e => e.agency === 'PDRRMO').reduce((sum, e) => sum + e.quantity, 0);
-  const pdrVehicles = vehicles.filter(v => v.agency === 'PDRRMO').length;
+  const pdrVehicles = vehicles.filter(v => v.agency === 'PDRRMO').reduce((sum, v) => sum + (v.quantity || 1), 0);
   const pdrPersonnel = personnel.filter(p => p.agency === 'PDRRMO').length;
   
   // Municipal/City LGUs (all except PDRRMO)
   const muniEquipment = equipment.filter(e => e.agency !== 'PDRRMO').reduce((sum, e) => sum + e.quantity, 0);
-  const muniVehicles = vehicles.filter(v => v.agency !== 'PDRRMO').length;
+  const muniVehicles = vehicles.filter(v => v.agency !== 'PDRRMO').reduce((sum, v) => sum + (v.quantity || 1), 0);
   const muniPersonnel = personnel.filter(p => p.agency !== 'PDRRMO').length;
 
   const allTrainings = personnel.flatMap(p => p.trainings);
@@ -42,7 +42,7 @@ export default function Dashboard({ equipment, vehicles, personnel }: DashboardP
     name: lgu.name.replace('Municipality of ', '').replace('City of ', '').replace('PDRRMO - ', ''),
     type: lgu.type,
     equipment: equipment.filter(e => e.agency === lgu.code).reduce((sum, e) => sum + e.quantity, 0),
-    vehicles: vehicles.filter(v => v.agency === lgu.code).length,
+    vehicles: vehicles.filter(v => v.agency === lgu.code).reduce((sum, v) => sum + (v.quantity || 1), 0),
     personnel: personnel.filter(p => p.agency === lgu.code).length,
   })).filter(l => l.equipment > 0 || l.vehicles > 0 || l.personnel > 0);
 
@@ -78,7 +78,7 @@ export default function Dashboard({ equipment, vehicles, personnel }: DashboardP
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-500 text-sm font-medium">Total Vehicles</p>
-              <p className="text-3xl font-bold text-gray-800 mt-1">{vehicles.length}</p>
+              <p className="text-3xl font-bold text-gray-800 mt-1">{vehicles.reduce((sum, v) => sum + (v.quantity || 1), 0)}</p>
               <p className="text-sm text-green-500">{goodConditionVehicles} operational</p>
             </div>
             <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center text-2xl">
@@ -278,7 +278,7 @@ export default function Dashboard({ equipment, vehicles, personnel }: DashboardP
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           {['Good', 'Fair', 'Poor', 'Needs Repair', 'Under Repair'].map((condition) => {
             const eqCount = equipment.filter(e => e.condition === condition).reduce((sum, e) => sum + e.quantity, 0);
-            const vCount = vehicles.filter(v => v.condition === condition).length;
+            const vCount = vehicles.filter(v => v.condition === condition).reduce((sum, v) => sum + (v.quantity || 1), 0);
             const colorMap = {
               'Good': 'bg-green-100 text-green-700 border-green-200',
               'Fair': 'bg-yellow-100 text-yellow-700 border-yellow-200',

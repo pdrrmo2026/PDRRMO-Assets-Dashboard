@@ -22,7 +22,7 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
   const getAgencyStats = () => {
     return RIZAL_LGUS.map(lgu => {
       const eqCount = equipment.filter(e => e.agency === lgu.code).reduce((sum, e) => sum + e.quantity, 0);
-      const vCount = vehicles.filter(v => v.agency === lgu.code).length;
+      const vCount = vehicles.filter(v => v.agency === lgu.code).reduce((sum, v) => sum + (v.quantity || 1), 0);
       const pCount = personnel.filter(p => p.agency === lgu.code).length;
       const acdvCount = acdvData.filter(a => a.registeredLGU === lgu.code).length;
       return {
@@ -67,9 +67,9 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
       
       if (filteredVehicles.length > 0) {
         rows.push(['=== VEHICLE INVENTORY ===']);
-        rows.push(['Plate Number', 'Type', 'Brand', 'Model', 'Capacity', 'Condition', 'Location', 'Agency', 'Date Added', 'Municipality']);
+        rows.push(['Plate Number', 'Type', 'Brand', 'Model', 'Capacity', 'Quantity', 'Condition', 'Location', 'Agency', 'Date Added', 'Municipality']);
         filteredVehicles.forEach(v => {
-          rows.push([v.plateNumber, v.type, v.brand, v.model, v.capacity, v.condition, v.location, v.agency, v.dateAdded, getMunicipalityName(v.agency)]);
+          rows.push([v.plateNumber, v.type, v.brand, v.model, v.capacity, (v.quantity || 1).toString(), v.condition, v.location, v.agency, v.dateAdded, getMunicipalityName(v.agency)]);
         });
         rows.push([]);
       }
@@ -311,7 +311,7 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
         ${filteredVehicles.length > 0 ? `
         <table>
           <thead>
-            <tr><th>Plate Number</th><th>Type</th><th>Brand/Model</th><th>Condition</th><th>Location</th><th>Municipality</th></tr>
+            <tr><th>Plate Number</th><th>Type</th><th>Brand/Model</th><th>Qty</th><th>Condition</th><th>Location</th><th>Municipality</th></tr>
           </thead>
           <tbody>
             ${filteredVehicles.map(v => `
@@ -319,6 +319,7 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
                 <td>${v.plateNumber}</td>
                 <td>${v.type}</td>
                 <td>${v.brand} ${v.model}</td>
+                <td>${v.quantity || 1}</td>
                 <td><span class="badge badge-${v.condition.toLowerCase().replace(' ', '-')}">${v.condition}</span></td>
                 <td>${v.location}</td>
                 <td>${getMunicipalityName(v.agency)}</td>
@@ -641,8 +642,8 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
           <div className="flex items-center justify-between">
             <div>
               <p className="text-green-100">Vehicle Report</p>
-              <p className="text-3xl font-bold mt-1">{vehicles.length}</p>
-              <p className="text-green-200 text-sm">Total Vehicles</p>
+              <p className="text-3xl font-bold mt-1">{vehicles.reduce((sum, v) => sum + (v.quantity || 1), 0)}</p>
+              <p className="text-green-200 text-sm">Total Units</p>
             </div>
             <div className="text-5xl opacity-50">🚗</div>
           </div>

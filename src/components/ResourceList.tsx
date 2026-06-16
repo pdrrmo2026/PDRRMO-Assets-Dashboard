@@ -417,9 +417,9 @@ export default function ResourceList({ type, data, onUpdate, onDelete, currentUs
           />
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Capacity <span className="text-red-500">*</span></label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Capacity</label>
           <input 
             type="text" 
             value={editFormData.capacity || ''} 
@@ -429,7 +429,17 @@ export default function ResourceList({ type, data, onUpdate, onDelete, currentUs
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Condition <span className="text-red-500">*</span></label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+          <input 
+            type="number" 
+            min="1"
+            value={editFormData.quantity || 1} 
+            onChange={(e) => setEditFormData({ ...editFormData, quantity: parseInt(e.target.value) || 1 })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Condition</label>
           <select 
             value={editFormData.condition || 'Good'} 
             onChange={(e) => setEditFormData({ ...editFormData, condition: e.target.value })}
@@ -696,7 +706,10 @@ export default function ResourceList({ type, data, onUpdate, onDelete, currentUs
                       <div className="bg-gray-50 rounded-lg p-4"><p className="text-gray-500 text-sm">Brand</p><p className="font-semibold">{selectedItem.brand}</p></div>
                       <div className="bg-gray-50 rounded-lg p-4"><p className="text-gray-500 text-sm">Model</p><p className="font-semibold">{selectedItem.model}</p></div>
                     </div>
-                    <div className="bg-gray-50 rounded-lg p-4"><p className="text-gray-500 text-sm">Capacity</p><p className="font-semibold">{selectedItem.capacity}</p></div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-gray-50 rounded-lg p-4"><p className="text-gray-500 text-sm">Capacity</p><p className="font-semibold">{selectedItem.capacity}</p></div>
+                      <div className="bg-gray-50 rounded-lg p-4"><p className="text-gray-500 text-sm">Quantity</p><p className="font-semibold">{selectedItem.quantity || 1}</p></div>
+                    </div>
                     <div className="bg-gray-50 rounded-lg p-4"><p className="text-gray-500 text-sm">Condition</p><span className={`inline-block px-3 py-1 rounded-full text-sm mt-1 ${getConditionColor(selectedItem.condition)}`}>{selectedItem.condition}</span></div>
                     <div className="bg-gray-50 rounded-lg p-4"><p className="text-gray-500 text-sm">Location</p><p className="font-semibold">{selectedItem.location}</p></div>
                     <div className="bg-gray-50 rounded-lg p-4"><p className="text-gray-500 text-sm">LGU / Agency</p><span className={`inline-block px-3 py-1 rounded-full text-sm mt-1 ${getAgencyColor(selectedItem.agency)}`}>{getAgencyShortName(selectedItem.agency)}</span></div>
@@ -823,7 +836,7 @@ export default function ResourceList({ type, data, onUpdate, onDelete, currentUs
             <thead className="bg-gray-50 border-b">
               <tr>
                 {type === 'equipment' && <><th className="px-4 py-4 text-left">Equipment</th><th className="px-4 py-4 text-left">Type</th><th className="px-4 py-4 text-left">Qty</th><th className="px-4 py-4 text-left">Condition</th><th className="px-4 py-4 text-left">LGU/AGENCY</th></>}
-                {type === 'vehicles' && <><th className="px-4 py-4 text-left">Vehicle</th><th className="px-4 py-4 text-left">Type</th><th className="px-4 py-4 text-left">Plate</th><th className="px-4 py-4 text-left">Condition</th><th className="px-4 py-4 text-left">LGU/AGENCY</th></>}
+                {type === 'vehicles' && <><th className="px-4 py-4 text-left">Vehicle</th><th className="px-4 py-4 text-left">Type</th><th className="px-4 py-4 text-left">Qty</th><th className="px-4 py-4 text-left">Plate</th><th className="px-4 py-4 text-left">Condition</th><th className="px-4 py-4 text-left">LGU/AGENCY</th></>}
                 {type === 'personnel' && <><th className="px-4 py-4 text-left">Name</th><th className="px-4 py-4 text-left">Position</th><th className="px-4 py-4 text-left">Contact</th><th className="px-4 py-4 text-left">Status</th><th className="px-4 py-4 text-left">LGU/AGENCY</th></>}
               </tr>
             </thead>
@@ -831,7 +844,7 @@ export default function ResourceList({ type, data, onUpdate, onDelete, currentUs
               {filteredData.map((item) => (
                 <tr key={item.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => handleRowClick(item)}>
                   {type === 'equipment' && <><td className="px-4 py-4 font-medium">{(item as Equipment).name}</td><td className="px-4 py-4 text-gray-600">{(item as Equipment).type}</td><td className="px-4 py-4">{(item as Equipment).quantity}</td><td className="px-4 py-4"><span className={`px-2 py-1 rounded-full text-xs ${getConditionColor((item as Equipment).condition)}`}>{(item as Equipment).condition}</span></td><td className="px-4 py-4"><span className={`px-2 py-1 rounded-full text-xs ${getAgencyColor(item.agency)}`}>{getAgencyShortName(item.agency)}</span></td></>}
-                  {type === 'vehicles' && <><td className="px-4 py-4 font-medium">{(item as Vehicle).brand} {(item as Vehicle).model}</td><td className="px-4 py-4 text-gray-600">{(item as Vehicle).type}</td><td className="px-4 py-4 font-mono">{(item as Vehicle).plateNumber}</td><td className="px-4 py-4"><span className={`px-2 py-1 rounded-full text-xs ${getConditionColor((item as Vehicle).condition)}`}>{(item as Vehicle).condition}</span></td><td className="px-4 py-4"><span className={`px-2 py-1 rounded-full text-xs ${getAgencyColor(item.agency)}`}>{getAgencyShortName(item.agency)}</span></td></>}
+                  {type === 'vehicles' && <><td className="px-4 py-4 font-medium">{(item as Vehicle).brand} {(item as Vehicle).model}</td><td className="px-4 py-4 text-gray-600">{(item as Vehicle).type}</td><td className="px-4 py-4">{(item as Vehicle).quantity || 1}</td><td className="px-4 py-4 font-mono">{(item as Vehicle).plateNumber}</td><td className="px-4 py-4"><span className={`px-2 py-1 rounded-full text-xs ${getConditionColor((item as Vehicle).condition)}`}>{(item as Vehicle).condition}</span></td><td className="px-4 py-4"><span className={`px-2 py-1 rounded-full text-xs ${getAgencyColor(item.agency)}`}>{getAgencyShortName(item.agency)}</span></td></>}
                   {type === 'personnel' && <><td className="px-4 py-4 font-medium">{(item as Personnel).name}</td><td className="px-4 py-4 text-gray-600">{(item as Personnel).position}</td><td className="px-4 py-4 text-blue-600">{(item as Personnel).contact}</td><td className="px-4 py-4"><span className={`px-2 py-1 rounded-full text-xs ${getConditionColor((item as Personnel).status)}`}>{(item as Personnel).status}</span></td><td className="px-4 py-4"><span className={`px-2 py-1 rounded-full text-xs ${getAgencyColor(item.agency)}`}>{getAgencyShortName(item.agency)}</span></td></>}
                 </tr>
               ))}

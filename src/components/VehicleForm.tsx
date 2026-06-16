@@ -29,6 +29,7 @@ export default function VehicleForm({ onSubmit, currentUserLguCode, isAdmin }: V
     brand: '',
     model: '',
     capacity: '',
+    quantity: 1,
     condition: 'Good' as Vehicle['condition'],
     location: '',
     lat: defaultLgu.lat as number,
@@ -60,6 +61,7 @@ export default function VehicleForm({ onSubmit, currentUserLguCode, isAdmin }: V
       brand: '',
       model: '',
       capacity: '',
+      quantity: 1,
       condition: 'Good',
       location: '',
       lat: defaultLgu.lat,
@@ -154,6 +156,20 @@ export default function VehicleForm({ onSubmit, currentUserLguCode, isAdmin }: V
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
+              Quantity
+            </label>
+            <input
+              type="number"
+              min="1"
+              value={formData.quantity}
+              onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 1 })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="e.g., 1"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Condition
             </label>
             <select
@@ -226,6 +242,7 @@ export default function VehicleForm({ onSubmit, currentUserLguCode, isAdmin }: V
                 brand: '',
                 model: '',
                 capacity: '',
+                quantity: 1,
                 condition: 'Good',
                 location: '',
                 lat: defaultLgu.lat,

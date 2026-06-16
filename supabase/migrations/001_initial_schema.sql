@@ -63,6 +63,7 @@ CREATE TABLE IF NOT EXISTS vehicles (
   brand         TEXT NOT NULL,
   model         TEXT NOT NULL,
   capacity      TEXT NOT NULL,
+  quantity      INTEGER NOT NULL DEFAULT 1,
   condition     condition_type NOT NULL DEFAULT 'Good',
   location      TEXT NOT NULL,
   lat           DOUBLE PRECISION NOT NULL DEFAULT 14.6042,

@@ -58,6 +58,7 @@ export interface Vehicle {
   brand: string;
   model: string;
   capacity: string;
+  quantity: number;
   condition: 'Good' | 'Fair' | 'Poor' | 'Needs Repair' | 'Under Repair';
   location: string;
   lat: number;
