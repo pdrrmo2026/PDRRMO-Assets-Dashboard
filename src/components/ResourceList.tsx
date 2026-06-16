@@ -374,7 +374,7 @@ export default function ResourceList({ type, data, onUpdate, onDelete, currentUs
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Plate Number <span className="text-red-500">*</span></label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Plate Number</label>
           <input 
             type="text" 
             value={editFormData.plateNumber || ''} 
