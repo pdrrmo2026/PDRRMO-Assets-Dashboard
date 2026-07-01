@@ -14,9 +14,11 @@ const vehicleTypes = [
 ];
 
 const positions = [
-  'Rescue Team Leader', 'Rescue Team Member', 'Medical Responder', 'Driver/Rescuer',
-  'Communication Officer', 'Incident Commander', 'Logistics Officer', 'Planning Officer',
-  'Operations Officer', 'Volunteer', 'Other',
+  'Rescue Team Leader', 'Rescue Team Member', 'Medical Responder', 'Driver/Ambulance Driver',
+  'Communication Officer', 'Communication Staff', 'Incident Commander', 'Logistics Officer',
+  'Logistics Staff', 'Planning Officer', 'Planning Staff', 'Operations Officer',
+  'Operations Staff', 'Admin and Training Officer', 'Admin and Training Staff',
+  'Volunteer', 'Other',
 ];
 
 const availableTrainings = [
