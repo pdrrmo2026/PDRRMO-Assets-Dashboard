@@ -75,7 +75,7 @@ export interface Personnel {
   contact: string;
   trainings: string[];
   status: 'Active' | 'On Leave' | 'Deployed';
-  hadrTeam: string;
+  hadrTeam: string[];
   dateAdded: string;
 }
 

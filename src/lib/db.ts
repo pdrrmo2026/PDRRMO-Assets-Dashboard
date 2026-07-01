@@ -81,7 +81,7 @@ function mapPersonnelFromDB(row: any): Personnel {
     contact: row.contact,
     trainings: row.trainings ?? [],
     status: row.status,
-    hadrTeam: row.hadr_team,
+    hadrTeam: row.hadr_team ? row.hadr_team.split(', ') : [],
     dateAdded: row.date_added,
   };
 }
@@ -94,7 +94,7 @@ function mapPersonnelToDB(item: Omit<Personnel, 'id' | 'dateAdded'>) {
     contact: item.contact,
     trainings: item.trainings,
     status: item.status,
-    hadr_team: item.hadrTeam,
+    hadr_team: item.hadrTeam ? item.hadrTeam.join(', ') : '',
   };
 }
 

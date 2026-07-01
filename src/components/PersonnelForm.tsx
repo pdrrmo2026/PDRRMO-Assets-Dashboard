@@ -113,7 +113,7 @@ export default function PersonnelForm({ onSubmit, currentUserLguCode, isAdmin }:
     contact: '',
     trainings: [] as string[],
     status: 'Active' as Personnel['status'],
-    hadrTeam: '',
+    hadrTeam: [] as string[],
   });
 
   const [submitted, setSubmitted] = useState(false);
@@ -132,6 +132,15 @@ export default function PersonnelForm({ onSubmit, currentUserLguCode, isAdmin }:
       trainings: formData.trainings.includes(training)
         ? formData.trainings.filter((t) => t !== training)
         : [...formData.trainings, training],
+    });
+  };
+
+  const toggleHadrTeam = (team: string) => {
+    setFormData({
+      ...formData,
+      hadrTeam: formData.hadrTeam.includes(team)
+        ? formData.hadrTeam.filter((t) => t !== team)
+        : [...formData.hadrTeam, team],
     });
   };
 
@@ -157,7 +166,7 @@ export default function PersonnelForm({ onSubmit, currentUserLguCode, isAdmin }:
       contact: '',
       trainings: [],
       status: 'Active',
-      hadrTeam: '',
+      hadrTeam: [],
     });
   };
 
@@ -267,20 +276,52 @@ export default function PersonnelForm({ onSubmit, currentUserLguCode, isAdmin }:
             </select>
           </div>
 
-          <div>
+          <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               HADR Team
             </label>
-            <select
-              value={formData.hadrTeam}
-              onChange={(e) => setFormData({ ...formData, hadrTeam: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="">Select HADR Team...</option>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mb-3">
               {hadrTeams.map((team) => (
-                <option key={team} value={team}>{team}</option>
+                <label
+                  key={team}
+                  className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-colors ${
+                    formData.hadrTeam.includes(team)
+                      ? 'bg-blue-50 border-blue-300 text-blue-700'
+                      : 'bg-white border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={formData.hadrTeam.includes(team)}
+                    onChange={() => toggleHadrTeam(team)}
+                    className="rounded text-blue-600"
+                  />
+                  <span className="text-sm">{team}</span>
+                </label>
               ))}
-            </select>
+            </div>
+            {formData.hadrTeam.length > 0 && (
+              <div className="mt-3">
+                <p className="text-sm text-gray-500 mb-2">Selected HADR Teams:</p>
+                <div className="flex flex-wrap gap-2">
+                  {formData.hadrTeam.map((team) => (
+                    <span
+                      key={team}
+                      className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm flex items-center gap-1"
+                    >
+                      {team}
+                      <button
+                        type="button"
+                        onClick={() => toggleHadrTeam(team)}
+                        className="ml-1 hover:text-blue-900"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -359,7 +400,7 @@ export default function PersonnelForm({ onSubmit, currentUserLguCode, isAdmin }:
               contact: '',
               trainings: [],
               status: 'Active',
-              hadrTeam: '',
+              hadrTeam: [],
             })}
             className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
           >

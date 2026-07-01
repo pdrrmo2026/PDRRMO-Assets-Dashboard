@@ -251,6 +251,14 @@ export default function ResourceList({ type, data, onUpdate, onDelete, currentUs
     setEditFormData({ ...editFormData, trainings: newTrainings });
   };
 
+  const toggleHadrTeam = (team: string) => {
+    const currentTeams = editFormData.hadrTeam || [];
+    const newTeams = currentTeams.includes(team)
+      ? currentTeams.filter((t: string) => t !== team)
+      : [...currentTeams, team];
+    setEditFormData({ ...editFormData, hadrTeam: newTeams });
+  };
+
   const addCustomTraining = () => {
     if (customTraining && !editFormData.trainings?.includes(customTraining)) {
       setEditFormData({ 
@@ -557,16 +565,50 @@ export default function ResourceList({ type, data, onUpdate, onDelete, currentUs
             {statuses.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">HADR Team <span className="text-red-500">*</span></label>
-          <select 
-            value={editFormData.hadrTeam || ''} 
-            onChange={(e) => setEditFormData({ ...editFormData, hadrTeam: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-          >
-            <option value="">Select HADR Team...</option>
-            {hadrTeams.map(t => <option key={t} value={t}>{t}</option>)}
-          </select>
+        <div className="md:col-span-3 border-t pt-4 mt-4">
+          <label className="block text-sm font-medium text-gray-700 mb-3">HADR Team <span className="text-red-500">*</span></label>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+            {hadrTeams.map((team) => (
+              <label
+                key={team}
+                className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-colors ${
+                  editFormData.hadrTeam?.includes(team)
+                    ? 'bg-blue-50 border-blue-300 text-blue-700'
+                    : 'bg-white border-gray-200 hover:bg-gray-50'
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={editFormData.hadrTeam?.includes(team) || false}
+                  onChange={() => toggleHadrTeam(team)}
+                  className="rounded text-blue-600"
+                />
+                <span className="text-sm">{team}</span>
+              </label>
+            ))}
+          </div>
+          {editFormData.hadrTeam?.length > 0 && (
+            <div className="mt-3 mb-4">
+              <p className="text-sm text-gray-500 mb-2">Selected HADR Teams:</p>
+              <div className="flex flex-wrap gap-2">
+                {editFormData.hadrTeam.map((team: string) => (
+                  <span
+                    key={team}
+                    className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm flex items-center gap-1"
+                  >
+                    {team}
+                    <button
+                      type="button"
+                      onClick={() => toggleHadrTeam(team)}
+                      className="ml-1 hover:text-blue-900"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -728,7 +770,7 @@ export default function ResourceList({ type, data, onUpdate, onDelete, currentUs
                     <div className="bg-gray-50 rounded-lg p-4"><p className="text-gray-500 text-sm">Status</p><span className={`inline-block px-3 py-1 rounded-full text-sm mt-1 ${getConditionColor(selectedItem.status)}`}>{selectedItem.status}</span></div>
                     <div className="bg-gray-50 rounded-lg p-4"><p className="text-gray-500 text-sm">LGU / Agency</p><span className={`inline-block px-3 py-1 rounded-full text-sm mt-1 ${getAgencyColor(selectedItem.agency)}`}>{getAgencyShortName(selectedItem.agency)}</span></div>
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-gray-50 rounded-lg p-4"><p className="text-gray-500 text-sm">HADR Team</p><p className="font-semibold">{selectedItem.hadrTeam}</p></div>
+                      <div className="bg-gray-50 rounded-lg p-4"><p className="text-gray-500 text-sm">HADR Team</p><p className="font-semibold">{selectedItem.hadrTeam?.length > 0 ? selectedItem.hadrTeam.join(', ') : 'None'}</p></div>
                       <div className="bg-gray-50 rounded-lg p-4"><p className="text-gray-500 text-sm">Date Added</p><p className="font-semibold">{selectedItem.dateAdded}</p></div>
                     </div>
                     {selectedItem.trainings?.length > 0 && (

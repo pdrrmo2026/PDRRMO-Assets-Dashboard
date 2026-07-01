@@ -178,7 +178,7 @@ export default function GISMap({ equipment, vehicles, personnel, acdvData }: GIS
               <p><strong>Contact:</strong> ${item.contact}</p>
               <p><strong>Status:</strong> ${item.status}</p>
               <p><strong>Agency:</strong> ${item.agency}</p>
-              <p><strong>HADR Team:</strong> ${item.hadrTeam}</p>
+              <p><strong>HADR Team:</strong> ${(item.hadrTeam && item.hadrTeam.length > 0) ? item.hadrTeam.join(', ') : 'None'}</p>
               <p><strong>Training:</strong></p>
               <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px;">
                 ${item.trainings.map(t => `<span style="background: #E0E7FF; color: #3730A3; padding: 2px 6px; border-radius: 4px; font-size: 11px;">${t}</span>`).join('')}
