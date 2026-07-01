@@ -41,15 +41,15 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
   const generateCSV = (agencyCode: string) => {
     const agencyName = RIZAL_LGUS.find(l => l.code === agencyCode)?.name || 'All_Agencies';
     const timestamp = new Date().toISOString().split('T')[0];
-    
+
     let csvContent = '';
     const rows: string[][] = [];
 
     if (downloadType === 'all' || downloadType === 'equipment') {
-      const filteredEquipment = agencyCode === 'all' 
-        ? equipment 
+      const filteredEquipment = agencyCode === 'all'
+        ? equipment
         : equipment.filter(e => e.agency === agencyCode);
-      
+
       if (filteredEquipment.length > 0) {
         rows.push(['=== EQUIPMENT INVENTORY ===']);
         rows.push(['Name', 'Type', 'Quantity', 'Condition', 'Location', 'Agency', 'Coordinates', 'Date Added', 'Municipality']);
@@ -61,10 +61,10 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
     }
 
     if (downloadType === 'all' || downloadType === 'vehicles') {
-      const filteredVehicles = agencyCode === 'all' 
-        ? vehicles 
+      const filteredVehicles = agencyCode === 'all'
+        ? vehicles
         : vehicles.filter(v => v.agency === agencyCode);
-      
+
       if (filteredVehicles.length > 0) {
         rows.push(['=== VEHICLE INVENTORY ===']);
         rows.push(['Plate Number', 'Type', 'Brand', 'Model', 'Capacity', 'Quantity', 'Condition', 'Location', 'Agency', 'Date Added', 'Municipality']);
@@ -76,10 +76,10 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
     }
 
     if (downloadType === 'all' || downloadType === 'personnel') {
-      const filteredPersonnel = agencyCode === 'all' 
-        ? personnel 
+      const filteredPersonnel = agencyCode === 'all'
+        ? personnel
         : personnel.filter(p => p.agency === agencyCode);
-      
+
       if (filteredPersonnel.length > 0) {
         rows.push(['=== PERSONNEL DIRECTORY ===']);
         rows.push(['Name', 'Position', 'Contact', 'Status', 'Agency', 'Trainings', 'HADR Team', 'Date Added', 'Municipality']);
@@ -91,10 +91,10 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
     }
 
     if (downloadType === 'all' || downloadType === 'hadr_team') {
-      const filteredPersonnel = agencyCode === 'all' 
-        ? personnel 
+      const filteredPersonnel = agencyCode === 'all'
+        ? personnel
         : personnel.filter(p => p.agency === agencyCode);
-        
+
       if (filteredPersonnel.length > 0 || downloadType === 'hadr_team') {
         rows.push(['=== HADR TEAM TRAINING REPORT ===']);
         rows.push(['HADR Team', 'Personnel Trained', 'LGUs Trained']);
@@ -111,10 +111,10 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
     }
 
     if (downloadType === 'all' || downloadType === 'acdv') {
-      const filteredACDV = agencyCode === 'all' 
-        ? acdvData 
+      const filteredACDV = agencyCode === 'all'
+        ? acdvData
         : acdvData.filter(a => a.registeredLGU === agencyCode);
-      
+
       if (filteredACDV.length > 0) {
         rows.push(['=== ACCREDITED COMMUNITY DISASTER VOLUNTEERS (ACDV) ===']);
         rows.push(['Organization', 'Office Address', 'Registered LGU', 'Personnel Count', 'Personnel Details', 'Municipality']);
@@ -130,11 +130,11 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
     }
 
     csvContent = rows.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
-    
+
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const fileName = `DRRM_Resources_${agencyName.replace(/[^a-zA-Z0-9]/g, '_')}_${timestamp}.csv`;
-    
+
     link.href = URL.createObjectURL(blob);
     link.download = fileName;
     link.click();
@@ -144,7 +144,7 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
   const generatePDF = (agencyCode: string) => {
     const agencyName = RIZAL_LGUS.find(l => l.code === agencyCode)?.name || 'All Agencies';
     const timestamp = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-    
+
     const filteredEquipment = agencyCode === 'all' ? equipment : equipment.filter(e => e.agency === agencyCode);
     const filteredVehicles = agencyCode === 'all' ? vehicles : vehicles.filter(v => v.agency === agencyCode);
     const filteredPersonnel = agencyCode === 'all' ? personnel : personnel.filter(p => p.agency === agencyCode);
@@ -410,18 +410,18 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
           </thead>
           <tbody>
             ${HADR_TEAMS.map(team => {
-              const personnelInTeam = filteredPersonnel.filter(p => (p.hadrTeam || []).includes(team));
-              const personnelCount = personnelInTeam.length;
-              const lgusTrained = new Set(personnelInTeam.map(p => p.agency)).size;
-              if (personnelCount === 0 && downloadType !== 'hadr_team') return '';
-              return \`
+      const personnelInTeam = filteredPersonnel.filter(p => (p.hadrTeam || []).includes(team));
+      const personnelCount = personnelInTeam.length;
+      const lgusTrained = new Set(personnelInTeam.map(p => p.agency)).size;
+      if (personnelCount === 0 && downloadType !== 'hadr_team') return '';
+      return `
                 <tr>
-                  <td>\${team}</td>
-                  <td>\${personnelCount}</td>
-                  <td>\${lgusTrained}</td>
+                  <td>${team}</td>
+                  <td>${personnelCount}</td>
+                  <td>${lgusTrained}</td>
                 </tr>
-              \`;
-            }).join('')}
+              `;
+    }).join('')}
           </tbody>
         </table>
         ` : ''}
@@ -576,20 +576,18 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
                 <tr key={agency.code} className="hover:bg-gray-50">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm ${
-                        agency.type === 'provincial' ? 'bg-purple-100' :
-                        agency.type === 'city' ? 'bg-blue-100' : 'bg-green-100'
-                      }`}>
+                      <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm ${agency.type === 'provincial' ? 'bg-purple-100' :
+                          agency.type === 'city' ? 'bg-blue-100' : 'bg-green-100'
+                        }`}>
                         {agency.type === 'provincial' ? '🏛️' : agency.type === 'city' ? '🏙️' : '🏘️'}
                       </span>
                       <span className="font-medium text-gray-800">{agency.name}</span>
                     </div>
                   </td>
                   <td className="px-4 py-3 text-center">
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      agency.type === 'provincial' ? 'bg-purple-100 text-purple-700' :
-                      agency.type === 'city' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
-                    }`}>
+                    <span className={`px-2 py-1 rounded-full text-xs ${agency.type === 'provincial' ? 'bg-purple-100 text-purple-700' :
+                        agency.type === 'city' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
+                      }`}>
                       {agency.type.charAt(0).toUpperCase() + agency.type.slice(1)}
                     </span>
                   </td>
