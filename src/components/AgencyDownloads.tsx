@@ -97,13 +97,19 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
 
       if (filteredPersonnel.length > 0 || downloadType === 'hadr_team') {
         rows.push(['=== HADR TEAM TRAINING REPORT ===']);
-        rows.push(['HADR Team', 'Personnel Trained', 'LGUs Trained']);
+        rows.push(['HADR Team', 'Rizal PDRRMO/PDRRMC Personnel Trained', 'Personnel Trained (LGU)', 'LGUs Trained']);
         HADR_TEAMS.forEach(team => {
           const personnelInTeam = filteredPersonnel.filter(p => (p.hadrTeam || []).includes(team));
-          const personnelCount = personnelInTeam.length;
-          const lgusTrained = new Set(personnelInTeam.map(p => p.agency)).size;
-          if (personnelCount > 0 || downloadType === 'hadr_team') {
-            rows.push([team, personnelCount.toString(), lgusTrained.toString()]);
+          const pdrrmcAgencies = ['PDRRMO', 'BFP_RIZAL', 'PCG_RIZAL', 'IB_80TH', 'PNP_RIZAL', 'DPWH_DEO1', 'DPWH_DEO2'];
+          const pdrrmcPersonnel = personnelInTeam.filter(p => pdrrmcAgencies.includes(p.agency));
+          const lguPersonnel = personnelInTeam.filter(p => !pdrrmcAgencies.includes(p.agency));
+
+          const pdrrmcCount = pdrrmcPersonnel.length;
+          const lguCount = lguPersonnel.length;
+          const lgusTrained = new Set(lguPersonnel.map(p => p.agency)).size;
+
+          if (personnelInTeam.length > 0 || downloadType === 'hadr_team') {
+            rows.push([team, pdrrmcCount.toString(), lguCount.toString(), lgusTrained.toString()]);
           }
         });
         rows.push([]);
@@ -406,18 +412,30 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
         <h2>🛡️ HADR Team Training Report</h2>
         <table>
           <thead>
-            <tr><th>HADR Team</th><th>Personnel Trained</th><th>LGUs Trained</th></tr>
+            <tr>
+              <th>HADR Team</th>
+              <th>Rizal PDRRMO/PDRRMC Personnel Trained</th>
+              <th>Personnel Trained (LGU)</th>
+              <th>LGUs Trained</th>
+            </tr>
           </thead>
           <tbody>
             ${HADR_TEAMS.map(team => {
       const personnelInTeam = filteredPersonnel.filter(p => (p.hadrTeam || []).includes(team));
-      const personnelCount = personnelInTeam.length;
-      const lgusTrained = new Set(personnelInTeam.map(p => p.agency)).size;
-      if (personnelCount === 0 && downloadType !== 'hadr_team') return '';
+      const pdrrmcAgencies = ['PDRRMO', 'BFP_RIZAL', 'PCG_RIZAL', 'IB_80TH', 'PNP_RIZAL', 'DPWH_DEO1', 'DPWH_DEO2'];
+      const pdrrmcPersonnel = personnelInTeam.filter(p => pdrrmcAgencies.includes(p.agency));
+      const lguPersonnel = personnelInTeam.filter(p => !pdrrmcAgencies.includes(p.agency));
+
+      const pdrrmcCount = pdrrmcPersonnel.length;
+      const lguCount = lguPersonnel.length;
+      const lgusTrained = new Set(lguPersonnel.map(p => p.agency)).size;
+
+      if (personnelInTeam.length === 0 && downloadType !== 'hadr_team') return '';
       return `
                 <tr>
                   <td>${team}</td>
-                  <td>${personnelCount}</td>
+                  <td>${pdrrmcCount}</td>
+                  <td>${lguCount}</td>
                   <td>${lgusTrained}</td>
                 </tr>
               `;
@@ -577,7 +595,7 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm ${agency.type === 'provincial' ? 'bg-purple-100' :
-                          agency.type === 'city' ? 'bg-blue-100' : 'bg-green-100'
+                        agency.type === 'city' ? 'bg-blue-100' : 'bg-green-100'
                         }`}>
                         {agency.type === 'provincial' ? '🏛️' : agency.type === 'city' ? '🏙️' : '🏘️'}
                       </span>
@@ -586,7 +604,7 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
                   </td>
                   <td className="px-4 py-3 text-center">
                     <span className={`px-2 py-1 rounded-full text-xs ${agency.type === 'provincial' ? 'bg-purple-100 text-purple-700' :
-                        agency.type === 'city' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
+                      agency.type === 'city' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
                       }`}>
                       {agency.type.charAt(0).toUpperCase() + agency.type.slice(1)}
                     </span>

@@ -111,6 +111,7 @@ export interface ACDVPersonnel {
   name: string;
   age: number;
   gender: 'Male' | 'Female' | 'Other';
+  address: string;
 }
 
 export const HADR_TEAMS = [
