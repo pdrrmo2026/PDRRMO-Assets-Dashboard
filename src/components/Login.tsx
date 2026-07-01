@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { LGUCode } from '../types';
 
 interface LoginProps {
-  onLogin: (username: string, isAdmin: boolean, lguCode: LGUCode) => void;
+  onLogin: (username: string, isAdmin: boolean, lguCode: LGUCode, isViewer?: boolean) => void;
 }
 
 const USERS: { username: string; password: string; lgu: string; isAdmin: boolean; lguCode: LGUCode }[] = [
@@ -59,7 +59,16 @@ export default function Login({ onLogin }: LoginProps) {
 
         {/* Login Form */}
         <div className="p-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-6 text-center">LGUs Login</h2>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3">
+            <h2 className="text-xl font-semibold text-gray-800 text-center sm:text-left">LGUs Login</h2>
+            <button
+              type="button"
+              onClick={() => onLogin('Viewer', false, 'PDRRMO', true)}
+              className="px-4 py-2 bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+            >
+              <span>👁️</span> Viewers Login
+            </button>
+          </div>
           
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>

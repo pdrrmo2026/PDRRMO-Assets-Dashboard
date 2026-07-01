@@ -9,6 +9,7 @@ interface ACDVListProps {
   onDelete?: (id: string) => void;
   currentUserLguCode: LGUCode;
   isAdmin: boolean;
+  isViewer?: boolean;
 }
 
 interface PasswordModalProps {
@@ -85,7 +86,7 @@ function PasswordModal({ isOpen, onClose, onConfirm, title = "Authentication Req
   );
 }
 
-export default function ACDVList({ acdvData, onUpdate, onDelete, currentUserLguCode, isAdmin }: ACDVListProps) {
+export default function ACDVList({ acdvData, onUpdate, onDelete, currentUserLguCode, isAdmin, isViewer }: ACDVListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterLGU, setFilterLGU] = useState<string>(isAdmin ? 'all' : currentUserLguCode);
   const [selectedACDV, setSelectedACDV] = useState<ACDV | null>(null);
@@ -252,14 +253,16 @@ export default function ACDVList({ acdvData, onUpdate, onDelete, currentUserLguC
                     </div>
                   </div>
 
-                  <div className="flex gap-3 mt-6 pt-4 border-t">
-                    <button onClick={handleEditClick} className="flex-1 px-4 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 flex items-center justify-center gap-2 font-semibold transition-colors">
-                      <span>✏️</span> Edit Organization
-                    </button>
-                    <button onClick={handleDeleteClick} className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center justify-center gap-2 font-semibold transition-colors">
-                      <span>🗑️</span> Delete Organization
-                    </button>
-                  </div>
+                  {!isViewer && (
+                    <div className="flex gap-3 mt-6 pt-4 border-t">
+                      <button onClick={handleEditClick} className="flex-1 px-4 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 flex items-center justify-center gap-2 font-semibold transition-colors">
+                        <span>✏️</span> Edit Organization
+                      </button>
+                      <button onClick={handleDeleteClick} className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center justify-center gap-2 font-semibold transition-colors">
+                        <span>🗑️</span> Delete Organization
+                      </button>
+                    </div>
+                  )}
                 </>
               ) : (
                 // Edit Mode - Full Form like Add Form

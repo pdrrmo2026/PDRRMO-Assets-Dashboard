@@ -22,6 +22,7 @@ export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('isLoggedIn') === 'true');
   const [currentUser, setCurrentUser] = useState<string>(() => localStorage.getItem('currentUser') || '');
   const [isAdmin, setIsAdmin] = useState(() => localStorage.getItem('isAdmin') === 'true');
+  const [isViewer, setIsViewer] = useState(() => localStorage.getItem('isViewer') === 'true');
   const [currentUserLguCode, setCurrentUserLguCode] = useState<LGUCode>(() => (localStorage.getItem('currentUserLguCode') as LGUCode) || 'PDRRMO');
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
   const [equipment, setEquipment] = useState<Equipment[]>([]);
@@ -40,8 +41,9 @@ export default function App() {
     localStorage.setItem('isLoggedIn', String(isLoggedIn));
     localStorage.setItem('currentUser', currentUser);
     localStorage.setItem('isAdmin', String(isAdmin));
+    localStorage.setItem('isViewer', String(isViewer));
     localStorage.setItem('currentUserLguCode', currentUserLguCode);
-  }, [isLoggedIn, currentUser, isAdmin, currentUserLguCode]);
+  }, [isLoggedIn, currentUser, isAdmin, isViewer, currentUserLguCode]);
 
   // ── Load all data from Supabase on login ─────────────────────
   useEffect(() => {
@@ -73,9 +75,10 @@ export default function App() {
   }, [isLoggedIn]);
 
   // ── Auth handlers ─────────────────────────────────────────────
-  const handleLogin = (username: string, admin: boolean, lguCode: LGUCode) => {
+  const handleLogin = (username: string, admin: boolean, lguCode: LGUCode, viewer: boolean = false) => {
     setCurrentUser(username);
     setIsAdmin(admin);
+    setIsViewer(viewer);
     setCurrentUserLguCode(lguCode);
     setIsLoggedIn(true);
   };
@@ -84,10 +87,12 @@ export default function App() {
     setIsLoggedIn(false);
     setCurrentUser('');
     setIsAdmin(false);
+    setIsViewer(false);
     setCurrentUserLguCode('PDRRMO');
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('currentUser');
     localStorage.removeItem('isAdmin');
+    localStorage.removeItem('isViewer');
     localStorage.removeItem('currentUserLguCode');
   };
 
@@ -266,19 +271,19 @@ export default function App() {
       case 'personnel-form':
         return <PersonnelForm onSubmit={addPersonnel} currentUserLguCode={currentUserLguCode} isAdmin={isAdmin} />;
       case 'equipment-list':
-        return <ResourceList type="equipment" data={equipment} onUpdate={updateEquipment} onDelete={deleteEquipmentItem} currentUserLguCode={currentUserLguCode} isAdmin={isAdmin} />;
+        return <ResourceList type="equipment" data={equipment} onUpdate={updateEquipment} onDelete={deleteEquipmentItem} currentUserLguCode={currentUserLguCode} isAdmin={isAdmin} isViewer={isViewer} />;
       case 'vehicle-list':
-        return <ResourceList type="vehicles" data={vehicles} onUpdate={updateVehicle} onDelete={deleteVehicleItem} currentUserLguCode={currentUserLguCode} isAdmin={isAdmin} />;
+        return <ResourceList type="vehicles" data={vehicles} onUpdate={updateVehicle} onDelete={deleteVehicleItem} currentUserLguCode={currentUserLguCode} isAdmin={isAdmin} isViewer={isViewer} />;
       case 'personnel-list':
-        return <ResourceList type="personnel" data={personnel} onUpdate={updatePersonnel} onDelete={deletePersonnelItem} currentUserLguCode={currentUserLguCode} isAdmin={isAdmin} />;
+        return <ResourceList type="personnel" data={personnel} onUpdate={updatePersonnel} onDelete={deletePersonnelItem} currentUserLguCode={currentUserLguCode} isAdmin={isAdmin} isViewer={isViewer} />;
       case 'gis-map':
         return <GISMap equipment={equipment} vehicles={vehicles} personnel={personnel} acdvData={acdvData} />;
       case 'agency-downloads':
-        return <AgencyDownloads equipment={equipment} vehicles={vehicles} personnel={personnel} acdvData={acdvData} />;
+        return <AgencyDownloads equipment={equipment} vehicles={vehicles} personnel={personnel} acdvData={acdvData} isViewer={isViewer} />;
       case 'acdv-form':
         return <ACDVForm onSubmit={addACDV} currentUserLguCode={currentUserLguCode} isAdmin={isAdmin} />;
       case 'acdv-list':
-        return <ACDVList acdvData={acdvData} onUpdate={updateACDV} onDelete={deleteACDVItem} currentUserLguCode={currentUserLguCode} isAdmin={isAdmin} />;
+        return <ACDVList acdvData={acdvData} onUpdate={updateACDV} onDelete={deleteACDVItem} currentUserLguCode={currentUserLguCode} isAdmin={isAdmin} isViewer={isViewer} />;
       default:
         return <Dashboard equipment={equipment} vehicles={vehicles} personnel={personnel} />;
     }
@@ -300,7 +305,7 @@ export default function App() {
         title="⚠️ Action Required Admin Authorization"
         message="Enter Admin Password to add this new entry to database"
       />
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} currentUser={currentUser} isAdmin={isAdmin} onLogout={handleLogout} />
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} currentUser={currentUser} isAdmin={isAdmin} isViewer={isViewer} onLogout={handleLogout} />
       <main className="flex-1 overflow-auto">
         <div className="p-6">
           {renderContent()}

@@ -5,26 +5,39 @@ interface SidebarProps {
   setActiveTab: (tab: TabType) => void;
   currentUser?: string;
   isAdmin?: boolean;
+  isViewer?: boolean;
   onLogout: () => void;
 }
 
-const menuItems = [
-  { id: 'dashboard' as TabType, label: 'Dashboard', icon: '📊' },
-  { id: 'gis-map' as TabType, label: 'GIS Map', icon: '🗺️' },
-  { id: 'agency-downloads' as TabType, label: 'Downloads', icon: '📥' },
-  { divider: true },
-  { id: 'equipment-form' as TabType, label: 'Add Equipment', icon: '🔧', section: 'Data Entry' },
-  { id: 'vehicle-form' as TabType, label: 'Add Vehicle', icon: '🚗', section: 'Data Entry' },
-  { id: 'personnel-form' as TabType, label: 'Add Personnel', icon: '👤', section: 'Data Entry' },
-  { id: 'acdv-form' as TabType, label: 'Registered ACDV', icon: '🤝', section: 'Data Entry' },
-  { divider: true },
-  { id: 'equipment-list' as TabType, label: 'Equipment List', icon: '📋', section: 'Records' },
-  { id: 'vehicle-list' as TabType, label: 'Vehicle List', icon: '🚛', section: 'Records' },
-  { id: 'personnel-list' as TabType, label: 'Personnel List', icon: '👥', section: 'Records' },
-  { id: 'acdv-list' as TabType, label: 'ACDV Registry', icon: '📜', section: 'Records' },
-];
+const getMenuItems = (isViewer: boolean) => {
+  const baseItems = [
+    { id: 'dashboard' as TabType, label: 'Dashboard', icon: '📊' },
+    { id: 'gis-map' as TabType, label: 'GIS Map', icon: '🗺️' },
+    { id: 'agency-downloads' as TabType, label: 'Downloads', icon: '📥' },
+    { divider: true },
+  ];
 
-export default function Sidebar({ activeTab, setActiveTab, currentUser, isAdmin, onLogout }: SidebarProps) {
+  const dataEntryItems = isViewer ? [] : [
+    { id: 'equipment-form' as TabType, label: 'Add Equipment', icon: '🔧', section: 'Data Entry' },
+    { id: 'vehicle-form' as TabType, label: 'Add Vehicle', icon: '🚗', section: 'Data Entry' },
+    { id: 'personnel-form' as TabType, label: 'Add Personnel', icon: '👤', section: 'Data Entry' },
+    { id: 'acdv-form' as TabType, label: 'Registered ACDV', icon: '🤝', section: 'Data Entry' },
+    { divider: true },
+  ];
+
+  const recordItems = [
+    { id: 'equipment-list' as TabType, label: 'Equipment List', icon: '📋', section: 'Records' },
+    { id: 'vehicle-list' as TabType, label: 'Vehicle List', icon: '🚛', section: 'Records' },
+    { id: 'personnel-list' as TabType, label: 'Personnel List', icon: '👥', section: 'Records' },
+    { id: 'acdv-list' as TabType, label: 'ACDV Registry', icon: '📜', section: 'Records' },
+  ];
+
+  return [...baseItems, ...dataEntryItems, ...recordItems];
+};
+
+export default function Sidebar({ activeTab, setActiveTab, currentUser, isAdmin, isViewer, onLogout }: SidebarProps) {
+  const currentMenuItems = getMenuItems(!!isViewer);
+  
   return (
     <aside className="w-64 bg-gradient-to-b from-blue-900 to-blue-800 text-white flex flex-col">
       <div className="p-6 border-b border-blue-700">
@@ -41,7 +54,7 @@ export default function Sidebar({ activeTab, setActiveTab, currentUser, isAdmin,
 
       <nav className="flex-1 p-4 overflow-y-auto">
         <div className="space-y-1">
-          {menuItems.map((item, index) => {
+          {currentMenuItems.map((item, index) => {
             if ('divider' in item) {
               return <div key={index} className="h-px bg-blue-700 my-4" />;
             }
@@ -69,7 +82,9 @@ export default function Sidebar({ activeTab, setActiveTab, currentUser, isAdmin,
           <div className="flex justify-between items-center mt-1">
             <div>
               <p className="font-semibold capitalize leading-tight">{currentUser || 'Guest'}</p>
-              <p className="text-xs text-blue-400 mt-0.5">{isAdmin ? '🔴 PDRRMO Admin' : 'LGU User'}</p>
+              <p className="text-xs text-blue-400 mt-0.5">
+                {isViewer ? '👁️ Viewer' : isAdmin ? '🔴 PDRRMO Admin' : 'LGU User'}
+              </p>
             </div>
             <button
               onClick={onLogout}

@@ -6,9 +6,10 @@ interface AgencyDownloadsProps {
   vehicles: Vehicle[];
   personnel: Personnel[];
   acdvData: ACDV[];
+  isViewer?: boolean;
 }
 
-export default function AgencyDownloads({ equipment, vehicles, personnel, acdvData }: AgencyDownloadsProps) {
+export default function AgencyDownloads({ equipment, vehicles, personnel, acdvData, isViewer }: AgencyDownloadsProps) {
   const [selectedAgency, setSelectedAgency] = useState<string>('all');
   const [downloadType, setDownloadType] = useState<'all' | 'equipment' | 'vehicles' | 'personnel' | 'acdv' | 'hadr_team'>('all');
 
@@ -147,7 +148,7 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
     URL.revokeObjectURL(link.href);
   };
 
-  const generatePDF = (agencyCode: string) => {
+  const generatePDF = (agencyCode: string, viewerMode: boolean = false) => {
     const agencyName = RIZAL_LGUS.find(l => l.code === agencyCode)?.name || 'All Agencies';
     const timestamp = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -318,9 +319,7 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
         </style>
       </head>
       <body>
-        <div class="print-controls">
-          <button class="btn-print" onclick="window.print()">🖨️ Print Report</button>
-        </div>
+        ${!viewerMode ? '<div class="print-controls"><button class="btn-print" onclick="window.print()">🖨️ Print Report</button></div>' : '<div class="print-controls" style="background:#fef3c7;"><span style="color:#92400e;font-weight:bold;">👁️ Viewer Mode – Printing is disabled.</span></div>'}
         <!-- Official Letterhead -->
         <div class="letterhead">
           <div class="letterhead-text">
@@ -557,17 +556,19 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
         </div>
 
         <div className="mt-6 flex flex-wrap gap-3">
+          {!isViewer && (
+            <button
+              onClick={() => generateCSV(selectedAgency)}
+              className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+            >
+              <span>📊</span> Download CSV
+            </button>
+          )}
           <button
-            onClick={() => generateCSV(selectedAgency)}
-            className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
-          >
-            <span>📊</span> Download CSV
-          </button>
-          <button
-            onClick={() => generatePDF(selectedAgency)}
+            onClick={() => generatePDF(selectedAgency, !!isViewer)}
             className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
           >
-            <span>📄</span> Print PDF Report
+            <span>📄</span> {isViewer ? 'Preview PDF Report' : 'Print PDF Report'}
           </button>
         </div>
       </div>
@@ -626,30 +627,33 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex justify-center gap-2">
+                      {!isViewer && (
+                        <button
+                          onClick={() => {
+                            setSelectedAgency(agency.code);
+                            setDownloadType('all');
+                            setTimeout(() => generateCSV(agency.code), 100);
+                          }}
+                          className="px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors text-sm"
+                          title="Download CSV"
+                        >
+                          📊
+                        </button>
+                      )}
                       <button
                         onClick={() => {
                           setSelectedAgency(agency.code);
                           setDownloadType('all');
-                          setTimeout(() => generateCSV(agency.code), 100);
-                        }}
-                        className="px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors text-sm"
-                        title="Download CSV"
-                      >
-                        📊
-                      </button>
-                      <button
-                        onClick={() => {
-                          setSelectedAgency(agency.code);
-                          setDownloadType('all');
-                          setTimeout(() => generatePDF(agency.code), 100);
+                          setTimeout(() => generatePDF(agency.code, !!isViewer), 100);
                         }}
                         className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors text-sm"
-                        title="Print PDF"
+                        title={isViewer ? 'Preview PDF' : 'Print PDF'}
                       >
                         📄
                       </button>
                     </div>
                   </td>
+
                 </tr>
               ))}
               {/* Total Row */}

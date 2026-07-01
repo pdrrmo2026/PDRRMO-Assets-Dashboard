@@ -49,6 +49,7 @@ const statuses = ['Active', 'On Leave', 'Deployed'];interface ResourceListProps 
   onDelete?: (id: string) => void;
   currentUserLguCode: LGUCode;
   isAdmin: boolean;
+  isViewer?: boolean;
 }
 
 interface PasswordModalProps {
@@ -125,7 +126,7 @@ export function PasswordModal({ isOpen, onClose, onConfirm, title = "Authenticat
   );
 }
 
-export default function ResourceList({ type, data, onUpdate, onDelete, currentUserLguCode, isAdmin }: ResourceListProps) {
+export default function ResourceList({ type, data, onUpdate, onDelete, currentUserLguCode, isAdmin, isViewer }: ResourceListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterAgency, setFilterAgency] = useState<string>(isAdmin ? 'all' : currentUserLguCode);
   const [filterCondition, setFilterCondition] = useState<string>('all');
@@ -770,14 +771,16 @@ export default function ResourceList({ type, data, onUpdate, onDelete, currentUs
                   </>
                 )}
 
-                <div className="flex gap-3 mt-6 pt-4 border-t">
-                  <button onClick={handleEditClick} className="flex-1 px-4 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 flex items-center justify-center gap-2 font-semibold transition-colors">
-                    <span>✏️</span> Edit Entry
-                  </button>
-                  <button onClick={handleDeleteClick} className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center justify-center gap-2 font-semibold transition-colors">
-                    <span>🗑️</span> Delete Entry
-                  </button>
-                </div>
+                {!isViewer && (
+                  <div className="flex gap-3 mt-6 pt-4 border-t">
+                    <button onClick={handleEditClick} className="flex-1 px-4 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 flex items-center justify-center gap-2 font-semibold transition-colors">
+                      <span>✏️</span> Edit Entry
+                    </button>
+                    <button onClick={handleDeleteClick} className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center justify-center gap-2 font-semibold transition-colors">
+                      <span>🗑️</span> Delete Entry
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               // Edit Mode - Full Form like Add Form
