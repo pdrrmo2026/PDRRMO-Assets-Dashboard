@@ -88,7 +88,7 @@ function PasswordModal({ isOpen, onClose, onConfirm, title = "Authentication Req
 
 export default function ACDVList({ acdvData, onUpdate, onDelete, currentUserLguCode, isAdmin, isViewer }: ACDVListProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterLGU, setFilterLGU] = useState<string>(isAdmin ? 'all' : currentUserLguCode);
+  const [filterLGU, setFilterLGU] = useState<string>((isAdmin || isViewer) ? 'all' : currentUserLguCode);
   const [selectedACDV, setSelectedACDV] = useState<ACDV | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -480,7 +480,7 @@ export default function ACDVList({ acdvData, onUpdate, onDelete, currentUserLguC
             <select 
               value={filterLGU} 
               onChange={(e) => setFilterLGU(e.target.value)} 
-              disabled={!isAdmin}
+              disabled={!isAdmin && !isViewer}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
             >
               <option value="all">All LGU/Agencies</option>
@@ -488,7 +488,7 @@ export default function ACDVList({ acdvData, onUpdate, onDelete, currentUserLguC
             </select>
           </div>
           <div className="flex items-end">
-            <button onClick={() => { setSearchTerm(''); setFilterLGU(isAdmin ? 'all' : currentUserLguCode); }} className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg">Clear Filters</button>
+            <button onClick={() => { setSearchTerm(''); setFilterLGU((isAdmin || isViewer) ? 'all' : currentUserLguCode); }} className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg">Clear Filters</button>
           </div>
         </div>
       </div>

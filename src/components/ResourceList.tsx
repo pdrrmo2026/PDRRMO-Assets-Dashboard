@@ -128,7 +128,7 @@ export function PasswordModal({ isOpen, onClose, onConfirm, title = "Authenticat
 
 export default function ResourceList({ type, data, onUpdate, onDelete, currentUserLguCode, isAdmin, isViewer }: ResourceListProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterAgency, setFilterAgency] = useState<string>(isAdmin ? 'all' : currentUserLguCode);
+  const [filterAgency, setFilterAgency] = useState<string>((isAdmin || isViewer) ? 'all' : currentUserLguCode);
   const [filterCondition, setFilterCondition] = useState<string>('all');
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -838,7 +838,7 @@ export default function ResourceList({ type, data, onUpdate, onDelete, currentUs
             <select 
               value={filterAgency} 
               onChange={(e) => setFilterAgency(e.target.value)} 
-              disabled={!isAdmin}
+              disabled={!isAdmin && !isViewer}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
             >
               <option value="all">All LGU/Agencies</option>
@@ -853,7 +853,7 @@ export default function ResourceList({ type, data, onUpdate, onDelete, currentUs
             </select>
           </div>
           <div className="flex items-end">
-            <button onClick={() => { setSearchTerm(''); setFilterAgency(isAdmin ? 'all' : currentUserLguCode); setFilterCondition('all'); }} className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg">Clear Filters</button>
+            <button onClick={() => { setSearchTerm(''); setFilterAgency((isAdmin || isViewer) ? 'all' : currentUserLguCode); setFilterCondition('all'); }} className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg">Clear Filters</button>
           </div>
         </div>
       </div>
