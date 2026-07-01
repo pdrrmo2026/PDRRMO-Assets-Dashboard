@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Equipment, Vehicle, Personnel, ACDV, RIZAL_LGUS } from '../types';
+import { Equipment, Vehicle, Personnel, ACDV, RIZAL_LGUS, HADR_TEAMS } from '../types';
 
 interface AgencyDownloadsProps {
   equipment: Equipment[];
@@ -8,35 +8,9 @@ interface AgencyDownloadsProps {
   acdvData: ACDV[];
 }
 
-const hadrTeamsList = [
-  'Incident Management Teams (IMT)', 'RDANA', 'EOC',
-  'Water / Flood Search and Rescue Teams', 'Mountain / Wilderness SRR', 'Generalist SRR',
-  'Network and Infrastructure', 'IT / Data Management', 'Procurement / Supply Management',
-  'Transport / Fleet Management', 'DRRM-H', 'Medical Emergency Response',
-  'Epidemiology', 'MHPSS', 'WASH Team', 'Police / Security',
-  'Traffic Management Control', 'Public Order and Safety', 'MDM',
-  'Recovery and Retrieval', 'Forensic / Identification', 'Psychosocial Support',
-  'Debris Removal / Clearance', 'Civil Engineering / Repair', 'Heavy Equipment / Machinery',
-  'Camp Management Committee (CMC)', 'Camp Management Team (CMT)', 'IDP Protection',
-  'Information and Monitoring', 'Women Friendly Spaces', 'Child Friendly Spaces',
-  'Humanitarian Supply Chain Management',
-];
-
 export default function AgencyDownloads({ equipment, vehicles, personnel, acdvData }: AgencyDownloadsProps) {
   const [selectedAgency, setSelectedAgency] = useState<string>('all');
-  const [downloadType, setDownloadType] = useState<'all' | 'equipment' | 'vehicles' | 'personnel' | 'acdv'>('all');
-  const [selectedHadrTeam, setSelectedHadrTeam] = useState<string>('all');
-  const [previewHtml, setPreviewHtml] = useState<string | null>(null);
-
-  const hadrTeamStats = hadrTeamsList.map(team => {
-    const teamPersonnel = personnel.filter(p => p.hadrTeam?.includes(team));
-    const uniqueLgus = new Set(teamPersonnel.map(p => p.agency)).size;
-    return {
-      name: team,
-      personnelCount: teamPersonnel.length,
-      lguCount: uniqueLgus
-    };
-  }).filter(stat => stat.personnelCount > 0);
+  const [downloadType, setDownloadType] = useState<'all' | 'equipment' | 'vehicles' | 'personnel' | 'acdv' | 'hadr_team'>('all');
 
   // Helper: get full municipality/LGU name from code
   const getMunicipalityName = (code: string) => {
@@ -102,19 +76,35 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
     }
 
     if (downloadType === 'all' || downloadType === 'personnel') {
-      let filteredPersonnel = agencyCode === 'all' 
+      const filteredPersonnel = agencyCode === 'all' 
         ? personnel 
         : personnel.filter(p => p.agency === agencyCode);
-      
-      if (selectedHadrTeam !== 'all') {
-        filteredPersonnel = filteredPersonnel.filter(p => p.hadrTeam?.includes(selectedHadrTeam));
-      }
       
       if (filteredPersonnel.length > 0) {
         rows.push(['=== PERSONNEL DIRECTORY ===']);
         rows.push(['Name', 'Position', 'Contact', 'Status', 'Agency', 'Trainings', 'HADR Team', 'Date Added', 'Municipality']);
         filteredPersonnel.forEach(p => {
-          rows.push([p.name, p.position, p.contact, p.status, p.agency, p.trainings.join('; '), p.hadrTeam?.join(', ') || '', p.dateAdded, getMunicipalityName(p.agency)]);
+          rows.push([p.name, p.position, p.contact, p.status, p.agency, p.trainings.join('; '), (p.hadrTeam || []).join('; '), p.dateAdded, getMunicipalityName(p.agency)]);
+        });
+        rows.push([]);
+      }
+    }
+
+    if (downloadType === 'all' || downloadType === 'hadr_team') {
+      const filteredPersonnel = agencyCode === 'all' 
+        ? personnel 
+        : personnel.filter(p => p.agency === agencyCode);
+        
+      if (filteredPersonnel.length > 0 || downloadType === 'hadr_team') {
+        rows.push(['=== HADR TEAM TRAINING REPORT ===']);
+        rows.push(['HADR Team', 'Personnel Trained', 'LGUs Trained']);
+        HADR_TEAMS.forEach(team => {
+          const personnelInTeam = filteredPersonnel.filter(p => (p.hadrTeam || []).includes(team));
+          const personnelCount = personnelInTeam.length;
+          const lgusTrained = new Set(personnelInTeam.map(p => p.agency)).size;
+          if (personnelCount > 0 || downloadType === 'hadr_team') {
+            rows.push([team, personnelCount.toString(), lgusTrained.toString()]);
+          }
         });
         rows.push([]);
       }
@@ -157,10 +147,7 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
     
     const filteredEquipment = agencyCode === 'all' ? equipment : equipment.filter(e => e.agency === agencyCode);
     const filteredVehicles = agencyCode === 'all' ? vehicles : vehicles.filter(v => v.agency === agencyCode);
-    let filteredPersonnel = agencyCode === 'all' ? personnel : personnel.filter(p => p.agency === agencyCode);
-    if (selectedHadrTeam !== 'all') {
-      filteredPersonnel = filteredPersonnel.filter(p => p.hadrTeam?.includes(selectedHadrTeam));
-    }
+    const filteredPersonnel = agencyCode === 'all' ? personnel : personnel.filter(p => p.agency === agencyCode);
     const filteredACDV = agencyCode === 'all' ? acdvData : acdvData.filter(a => a.registeredLGU === agencyCode);
 
     const htmlContent = `
@@ -290,15 +277,44 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
             padding-top: 10px;
           }
           
+          }
+          
+          /* Print controls */
+          .print-controls {
+            text-align: right;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f3f4f6;
+            border-radius: 8px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+          }
+          .btn-print {
+            background-color: #dc2626;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+          }
+          .btn-print:hover { background-color: #b91c1c; }
+          
           @media print { 
             body { padding: 0; } 
             .letterhead { page-break-after: avoid; }
             table { page-break-inside: auto; }
             tr { page-break-inside: avoid; page-break-after: auto; }
+            .print-controls { display: none !important; }
           }
         </style>
       </head>
       <body>
+        <div class="print-controls">
+          <button class="btn-print" onclick="window.print()">🖨️ Print Report</button>
+        </div>
         <!-- Official Letterhead -->
         <div class="letterhead">
           <div class="letterhead-text">
@@ -368,7 +384,7 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
         ${filteredPersonnel.length > 0 ? `
         <table>
           <thead>
-            <tr><th>Name</th><th>Position</th><th>Contact</th><th>Status</th><th>Trainings</th><th>HADR Team</th><th>Municipality</th></tr>
+            <tr><th>Name</th><th>Position</th><th>Contact</th><th>Status</th><th>Trainings</th><th>Municipality</th></tr>
           </thead>
           <tbody>
             ${filteredPersonnel.map(p => `
@@ -378,13 +394,36 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
                 <td>${p.contact}</td>
                 <td><span class="badge badge-${p.status.toLowerCase().replace(' ', '-')}">${p.status}</span></td>
                 <td>${p.trainings.join(', ')}</td>
-                <td>${p.hadrTeam?.join(', ') || ''}</td>
                 <td>${getMunicipalityName(p.agency)}</td>
               </tr>
             `).join('')}
           </tbody>
         </table>
         ` : '<p>No personnel records found.</p>'}
+        ` : ''}
+
+        ${downloadType === 'all' || downloadType === 'hadr_team' ? `
+        <h2>🛡️ HADR Team Training Report</h2>
+        <table>
+          <thead>
+            <tr><th>HADR Team</th><th>Personnel Trained</th><th>LGUs Trained</th></tr>
+          </thead>
+          <tbody>
+            ${HADR_TEAMS.map(team => {
+              const personnelInTeam = filteredPersonnel.filter(p => (p.hadrTeam || []).includes(team));
+              const personnelCount = personnelInTeam.length;
+              const lgusTrained = new Set(personnelInTeam.map(p => p.agency)).size;
+              if (personnelCount === 0 && downloadType !== 'hadr_team') return '';
+              return \`
+                <tr>
+                  <td>\${team}</td>
+                  <td>\${personnelCount}</td>
+                  <td>\${lgusTrained}</td>
+                </tr>
+              \`;
+            }).join('')}
+          </tbody>
+        </table>
         ` : ''}
 
         ${downloadType === 'all' || downloadType === 'acdv' ? `
@@ -438,20 +477,11 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
       </html>
     `;
 
-    setPreviewHtml(htmlContent);
-  };
-
-  const handleConfirmPrint = () => {
-    if (!previewHtml) return;
     const printWindow = window.open('', '_blank');
     if (printWindow) {
-      printWindow.document.write(previewHtml);
+      printWindow.document.write(htmlContent);
       printWindow.document.close();
       printWindow.focus();
-      setTimeout(() => {
-        printWindow.print();
-        setPreviewHtml(null);
-      }, 500);
     }
   };
 
@@ -502,27 +532,10 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
               <option value="equipment">Equipment Only</option>
               <option value="vehicles">Vehicles Only</option>
               <option value="personnel">Personnel Only</option>
+              <option value="hadr_team">HADR Team Report</option>
               <option value="acdv">ACDV Only</option>
             </select>
           </div>
-
-          {(downloadType === 'all' || downloadType === 'personnel') && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">HADR Team Filter</label>
-              <select
-                value={selectedHadrTeam}
-                onChange={(e) => setSelectedHadrTeam(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="all">All HADR Teams</option>
-                {hadrTeamStats.map(stat => (
-                  <option key={stat.name} value={stat.name}>
-                    {stat.name} ({stat.lguCount} LGUs, {stat.personnelCount} Personnel)
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
         </div>
 
         <div className="mt-6 flex flex-wrap gap-3">
@@ -758,45 +771,6 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
           </button>
         </div>
       </div>
-
-      {/* Print Preview Modal */}
-      {previewHtml && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[70]" onClick={() => setPreviewHtml(null)}>
-          <div className="bg-white rounded-xl p-6 w-full max-w-5xl h-[90vh] shadow-2xl flex flex-col" onClick={(e) => e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                <span>📄</span> Print Preview
-              </h2>
-              <button onClick={() => setPreviewHtml(null)} className="text-gray-500 hover:text-gray-700 text-2xl">
-                &times;
-              </button>
-            </div>
-            
-            <div className="flex-1 border-2 border-gray-200 rounded-lg overflow-hidden bg-gray-50 relative mb-4">
-              <iframe 
-                srcDoc={previewHtml} 
-                className="w-full h-full absolute inset-0"
-                title="Print Preview"
-              />
-            </div>
-
-            <div className="flex justify-end gap-3 mt-auto">
-              <button
-                onClick={() => setPreviewHtml(null)}
-                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConfirmPrint}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-              >
-                <span>🖨️</span> Confirm Print
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

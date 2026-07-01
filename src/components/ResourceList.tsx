@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Equipment, Vehicle, Personnel, RIZAL_LGUS, LGUCode } from '../types';
+import { Equipment, Vehicle, Personnel, RIZAL_LGUS, LGUCode, HADR_TEAMS } from '../types';
 
 const EDIT_PASSWORD = 'pdrrmo0926';
 
@@ -37,19 +37,7 @@ const availableTrainings = [
   'Humanitarian Supply Chain Management',
 ];
 
-const hadrTeams = [
-  'Incident Management Teams (IMT)', 'RDANA', 'EOC',
-  'Water / Flood Search and Rescue Teams', 'Mountain / Wilderness SRR', 'Generalist SRR',
-  'Network and Infrastructure', 'IT / Data Management', 'Procurement / Supply Management',
-  'Transport / Fleet Management', 'DRRM-H', 'Medical Emergency Response',
-  'Epidemiology', 'MHPSS', 'WASH Team', 'Police / Security',
-  'Traffic Management Control', 'Public Order and Safety', 'MDM',
-  'Recovery and Retrieval', 'Forensic / Identification', 'Psychosocial Support',
-  'Debris Removal / Clearance', 'Civil Engineering / Repair', 'Heavy Equipment / Machinery',
-  'Camp Management Committee (CMC)', 'Camp Management Team (CMT)', 'IDP Protection',
-  'Information and Monitoring', 'Women Friendly Spaces', 'Child Friendly Spaces',
-  'Humanitarian Supply Chain Management',
-];
+
 
 const conditions = ['Good', 'Fair', 'Poor', 'Needs Repair', 'Under Repair'];
 const statuses = ['Active', 'On Leave', 'Deployed'];interface ResourceListProps {
@@ -249,14 +237,6 @@ export default function ResourceList({ type, data, onUpdate, onDelete, currentUs
       ? currentTrainings.filter((t: string) => t !== training)
       : [...currentTrainings, training];
     setEditFormData({ ...editFormData, trainings: newTrainings });
-  };
-
-  const toggleHadrTeam = (team: string) => {
-    const currentTeams = editFormData.hadrTeam || [];
-    const newTeams = currentTeams.includes(team)
-      ? currentTeams.filter((t: string) => t !== team)
-      : [...currentTeams, team];
-    setEditFormData({ ...editFormData, hadrTeam: newTeams });
   };
 
   const addCustomTraining = () => {
@@ -565,50 +545,52 @@ export default function ResourceList({ type, data, onUpdate, onDelete, currentUs
             {statuses.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
-        <div className="md:col-span-3 border-t pt-4 mt-4">
-          <label className="block text-sm font-medium text-gray-700 mb-3">HADR Team <span className="text-red-500">*</span></label>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
-            {hadrTeams.map((team) => (
-              <label
-                key={team}
-                className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-colors ${
-                  editFormData.hadrTeam?.includes(team)
-                    ? 'bg-blue-50 border-blue-300 text-blue-700'
-                    : 'bg-white border-gray-200 hover:bg-gray-50'
-                }`}
-              >
-                <input
-                  type="checkbox"
-                  checked={editFormData.hadrTeam?.includes(team) || false}
-                  onChange={() => toggleHadrTeam(team)}
-                  className="rounded text-blue-600"
-                />
-                <span className="text-sm">{team}</span>
-              </label>
-            ))}
-          </div>
-          {editFormData.hadrTeam?.length > 0 && (
-            <div className="mt-3 mb-4">
-              <p className="text-sm text-gray-500 mb-2">Selected HADR Teams:</p>
-              <div className="flex flex-wrap gap-2">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">HADR Team <span className="text-red-500">*</span></label>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => {
+                const el = document.getElementById('hadr-dropdown-edit');
+                if (el) el.classList.toggle('hidden');
+              }}
+              className="w-full px-4 py-2 text-left bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 flex justify-between items-center"
+            >
+              <span className="truncate">
+                {editFormData.hadrTeam?.length > 0 
+                  ? `${editFormData.hadrTeam.length} selected` 
+                  : 'Select HADR Teams...'}
+              </span>
+              <span className="text-gray-500 text-xs">▼</span>
+            </button>
+            <div id="hadr-dropdown-edit" className="hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+              {HADR_TEAMS.map(team => (
+                <label key={team} className="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={editFormData.hadrTeam?.includes(team) || false}
+                    onChange={() => {
+                      const current = editFormData.hadrTeam || [];
+                      const next = current.includes(team) ? current.filter((t: string) => t !== team) : [...current, team];
+                      setEditFormData({ ...editFormData, hadrTeam: next });
+                    }}
+                    className="mr-3 rounded text-orange-600 focus:ring-orange-500"
+                  />
+                  <span className="text-sm text-gray-700">{team}</span>
+                </label>
+              ))}
+            </div>
+            {editFormData.hadrTeam?.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-1">
                 {editFormData.hadrTeam.map((team: string) => (
-                  <span
-                    key={team}
-                    className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm flex items-center gap-1"
-                  >
+                  <span key={team} className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-orange-100 text-orange-700">
                     {team}
-                    <button
-                      type="button"
-                      onClick={() => toggleHadrTeam(team)}
-                      className="ml-1 hover:text-blue-900"
-                    >
-                      ×
-                    </button>
+                    <button type="button" onClick={() => setEditFormData({...editFormData, hadrTeam: editFormData.hadrTeam.filter((t: string) => t !== team)})} className="hover:text-orange-900 font-bold">&times;</button>
                   </span>
                 ))}
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
@@ -770,7 +752,7 @@ export default function ResourceList({ type, data, onUpdate, onDelete, currentUs
                     <div className="bg-gray-50 rounded-lg p-4"><p className="text-gray-500 text-sm">Status</p><span className={`inline-block px-3 py-1 rounded-full text-sm mt-1 ${getConditionColor(selectedItem.status)}`}>{selectedItem.status}</span></div>
                     <div className="bg-gray-50 rounded-lg p-4"><p className="text-gray-500 text-sm">LGU / Agency</p><span className={`inline-block px-3 py-1 rounded-full text-sm mt-1 ${getAgencyColor(selectedItem.agency)}`}>{getAgencyShortName(selectedItem.agency)}</span></div>
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-gray-50 rounded-lg p-4"><p className="text-gray-500 text-sm">HADR Team</p><p className="font-semibold">{selectedItem.hadrTeam?.length > 0 ? selectedItem.hadrTeam.join(', ') : 'None'}</p></div>
+                      <div className="bg-gray-50 rounded-lg p-4"><p className="text-gray-500 text-sm">HADR Teams</p><p className="font-semibold">{(selectedItem.hadrTeam || []).join(', ') || 'None'}</p></div>
                       <div className="bg-gray-50 rounded-lg p-4"><p className="text-gray-500 text-sm">Date Added</p><p className="font-semibold">{selectedItem.dateAdded}</p></div>
                     </div>
                     {selectedItem.trainings?.length > 0 && (

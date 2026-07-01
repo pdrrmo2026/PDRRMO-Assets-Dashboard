@@ -111,5 +111,39 @@ export interface ACDVPersonnel {
   name: string;
   age: number;
   gender: 'Male' | 'Female' | 'Other';
-  address: string;
 }
+
+export const HADR_TEAMS = [
+  'Incident Management Teams (IMT)',
+  'RDANA',
+  'EOC',
+  'Water / Flood Search and Rescue Teams',
+  'Mountain / Wilderness SRR',
+  'Generalist SRR',
+  'Network and Infrastructure',
+  'IT / Data Management',
+  'Procurement / Supply Management',
+  'Transport / Fleet Management',
+  'DRRM-H',
+  'Medical Emergency Response',
+  'Epidemiology',
+  'MHPSS',
+  'WASH Team',
+  'Police / Security',
+  'Traffic Management Control',
+  'Public Order and Safety',
+  'MDM',
+  'Recovery and Retrieval',
+  'Forensic / Identification',
+  'Psychosocial Support',
+  'Debris Removal / Clearance',
+  'Civil Engineering / Repair',
+  'Heavy Equipment / Machinery',
+  'Camp Management Committee (CMC)',
+  'Camp Management Team (CMT)',
+  'IDP Protection',
+  'Information and Monitoring',
+  'Women Friendly Spaces',
+  'Child Friendly Spaces',
+  'Humanitarian Supply Chain Management',
+];
