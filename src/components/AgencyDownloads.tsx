@@ -677,28 +677,32 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex justify-center gap-2">
-                    <button
-                      onClick={() => {
-                        setSelectedAgency('all');
-                        setDownloadType('all');
-                        setTimeout(() => generateCSV('all'), 100);
-                      }}
-                      className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition-colors text-sm"
-                      title="Download All CSV"
-                    >
-                      📊 All
-                    </button>
-                    <button
-                      onClick={() => {
-                        setSelectedAgency('all');
-                        setDownloadType('all');
-                        setTimeout(() => generatePDF('all'), 100);
-                      }}
-                      className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors text-sm"
-                      title="Print All PDF"
-                    >
-                      📄 All
-                    </button>
+                    {!isViewer && (
+                      <>
+                        <button
+                          onClick={() => {
+                            setSelectedAgency('all');
+                            setDownloadType('all');
+                            setTimeout(() => generateCSV('all'), 100);
+                          }}
+                          className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition-colors text-sm"
+                          title="Download All CSV"
+                        >
+                          📊 All
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelectedAgency('all');
+                            setDownloadType('all');
+                            setTimeout(() => generatePDF('all'), 100);
+                          }}
+                          className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors text-sm"
+                          title="Print All PDF"
+                        >
+                          📄 All
+                        </button>
+                      </>
+                    )}
                   </div>
                 </td>
               </tr>
@@ -720,15 +724,17 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
             </div>
             <div className="text-5xl opacity-50">🔧</div>
           </div>
-          <button
-            onClick={() => {
-              setDownloadType('equipment');
-              generateCSV('all');
-            }}
-            className="w-full mt-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
-          >
-            Download Equipment CSV
-          </button>
+          {!isViewer && (
+            <button
+              onClick={() => {
+                setDownloadType('equipment');
+                generateCSV('all');
+              }}
+              className="w-full mt-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+            >
+              Download Equipment CSV
+            </button>
+          )}
         </div>
 
         <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white">
@@ -740,15 +746,17 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
             </div>
             <div className="text-5xl opacity-50">🚗</div>
           </div>
-          <button
-            onClick={() => {
-              setDownloadType('vehicles');
-              generateCSV('all');
-            }}
-            className="w-full mt-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
-          >
-            Download Vehicles CSV
-          </button>
+          {!isViewer && (
+            <button
+              onClick={() => {
+                setDownloadType('vehicles');
+                generateCSV('all');
+              }}
+              className="w-full mt-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+            >
+              Download Vehicles CSV
+            </button>
+          )}
         </div>
 
         <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-6 text-white">
@@ -760,15 +768,17 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
             </div>
             <div className="text-5xl opacity-50">👥</div>
           </div>
-          <button
-            onClick={() => {
-              setDownloadType('personnel');
-              generateCSV('all');
-            }}
-            className="w-full mt-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
-          >
-            Download Personnel CSV
-          </button>
+          {!isViewer && (
+            <button
+              onClick={() => {
+                setDownloadType('personnel');
+                generateCSV('all');
+              }}
+              className="w-full mt-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+            >
+              Download Personnel CSV
+            </button>
+          )}
         </div>
 
         <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white">
@@ -780,15 +790,17 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
             </div>
             <div className="text-5xl opacity-50">🤝</div>
           </div>
-          <button
-            onClick={() => {
-              setDownloadType('acdv');
-              generateCSV('all');
-            }}
-            className="w-full mt-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
-          >
-            Download ACDV CSV
-          </button>
+          {!isViewer && (
+            <button
+              onClick={() => {
+                setDownloadType('acdv');
+                generateCSV('all');
+              }}
+              className="w-full mt-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+            >
+              Download ACDV CSV
+            </button>
+          )}
         </div>
       </div>
     </div>
