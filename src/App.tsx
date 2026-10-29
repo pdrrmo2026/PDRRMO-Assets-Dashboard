@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import EquipmentForm from './components/EquipmentForm';
@@ -31,6 +31,7 @@ export default function App() {
   const [acdvData, setACDVData] = useState<ACDV[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Add confirmation states
   const [showAddPasswordModal, setShowAddPasswordModal] = useState(false);
@@ -235,25 +236,25 @@ export default function App() {
   const renderContent = () => {
     if (isLoading) {
       return (
-        <div className="flex flex-col items-center justify-center h-64 gap-4">
-          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-          <p className="text-gray-500 text-lg">Loading data from database...</p>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '256px', gap: '16px' }}>
+          <div className="spinner" />
+          <p style={{ color: '#6b7280', fontSize: '18px' }}>Loading data from database...</p>
         </div>
       );
     }
 
     if (loadError) {
       return (
-        <div className="max-w-lg mx-auto mt-12 bg-red-50 border border-red-200 rounded-xl p-6 text-center">
-          <span className="text-4xl">⚠️</span>
-          <h2 className="text-xl font-bold text-red-700 mt-3">Database Connection Error</h2>
-          <p className="text-red-600 mt-2 text-sm">{loadError}</p>
-          <p className="text-gray-500 text-xs mt-3">
+        <div style={{ maxWidth: '512px', margin: '48px auto', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '12px', padding: '24px', textAlign: 'center' }}>
+          <span style={{ fontSize: '40px' }}>⚠️</span>
+          <h2 style={{ color: '#b91c1c', fontSize: '20px', fontWeight: 'bold', marginTop: '12px' }}>Database Connection Error</h2>
+          <p style={{ color: '#dc2626', marginTop: '8px', fontSize: '14px' }}>{loadError}</p>
+          <p style={{ color: '#6b7280', fontSize: '12px', marginTop: '12px' }}>
             Tiyaking na-run na ang SQL migration sa Supabase dashboard at tama ang mga keys sa .env file.
           </p>
           <button
             onClick={() => window.location.reload()}
-            className="mt-4 px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            style={{ marginTop: '16px', padding: '8px 24px', background: '#dc2626', color: '#ffffff', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: '600' }}
           >
             Retry
           </button>
@@ -294,7 +295,22 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="app-layout">
+      {/* Mobile hamburger button */}
+      <button
+        className="hamburger-btn"
+        onClick={() => setSidebarOpen(true)}
+        aria-label="Open menu"
+      >
+        ☰
+      </button>
+
+      {/* Sidebar overlay (mobile) */}
+      <div
+        className={`sidebar-overlay${sidebarOpen ? ' open' : ''}`}
+        onClick={() => setSidebarOpen(false)}
+      />
+
       <PasswordModal
         isOpen={showAddPasswordModal}
         onClose={() => {
@@ -305,9 +321,20 @@ export default function App() {
         title="⚠️ Action Required Admin Authorization"
         message="Enter Admin Password to add this new entry to database"
       />
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} currentUser={currentUser} isAdmin={isAdmin} isViewer={isViewer} onLogout={handleLogout} />
-      <main className="flex-1 overflow-auto">
-        <div className="p-6">
+
+      <Sidebar
+        activeTab={activeTab}
+        setActiveTab={(tab) => { setActiveTab(tab); setSidebarOpen(false); }}
+        currentUser={currentUser}
+        isAdmin={isAdmin}
+        isViewer={isViewer}
+        onLogout={handleLogout}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
+
+      <main className="main-content">
+        <div style={{ padding: '24px' }}>
           {renderContent()}
         </div>
       </main>

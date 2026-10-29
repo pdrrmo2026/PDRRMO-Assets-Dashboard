@@ -7,6 +7,8 @@ interface SidebarProps {
   isAdmin?: boolean;
   isViewer?: boolean;
   onLogout: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
 const getMenuItems = (isViewer: boolean) => {
@@ -35,67 +37,144 @@ const getMenuItems = (isViewer: boolean) => {
   return [...baseItems, ...dataEntryItems, ...recordItems];
 };
 
-export default function Sidebar({ activeTab, setActiveTab, currentUser, isAdmin, isViewer, onLogout }: SidebarProps) {
+export default function Sidebar({ activeTab, setActiveTab, currentUser, isAdmin, isViewer, onLogout, isOpen, onClose }: SidebarProps) {
   const currentMenuItems = getMenuItems(!!isViewer);
-  
+
+  const activeStyle: React.CSSProperties = {
+    backgroundColor: '#f97316',
+    color: '#ffffff',
+    boxShadow: '0 4px 6px rgba(0,0,0,0.2)',
+  };
+
+  const inactiveStyle: React.CSSProperties = {
+    color: '#bfdbfe',
+    backgroundColor: 'transparent',
+  };
+
   return (
-    <aside className="w-64 bg-gradient-to-b from-blue-900 to-blue-800 text-white flex flex-col">
-      <div className="p-6 border-b border-blue-700">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center text-2xl font-bold">
+    <aside className={`sidebar${isOpen ? ' open' : ''}`}>
+      {/* Close button (mobile only) */}
+      <button
+        onClick={onClose}
+        style={{
+          display: 'none',
+          position: 'absolute',
+          top: '12px',
+          right: '12px',
+          background: 'rgba(255,255,255,0.15)',
+          border: 'none',
+          color: '#fff',
+          borderRadius: '6px',
+          width: '32px',
+          height: '32px',
+          fontSize: '18px',
+          cursor: 'pointer',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+        className="sidebar-close-btn"
+        aria-label="Close menu"
+      >
+        ✕
+      </button>
+
+      {/* Header */}
+      <div style={{ padding: '24px', borderBottom: '1px solid rgba(255,255,255,0.15)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{
+            width: '48px', height: '48px', minWidth: '48px',
+            backgroundColor: '#f97316', borderRadius: '8px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '24px', fontWeight: 'bold',
+          }}>
             🏛️
           </div>
           <div>
-            <h1 className="font-bold text-lg leading-tight">DRRM Resource</h1>
-            <p className="text-blue-300 text-sm">Management System</p>
+            <h1 style={{ fontWeight: 'bold', fontSize: '17px', lineHeight: '1.2', margin: 0, color: '#fff' }}>DRRM Resource</h1>
+            <p style={{ color: '#93c5fd', fontSize: '13px', margin: 0 }}>Management System</p>
           </div>
         </div>
       </div>
 
-      <nav className="flex-1 p-4 overflow-y-auto">
-        <div className="space-y-1">
+      {/* Navigation */}
+      <nav style={{ flex: 1, padding: '16px', overflowY: 'auto', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
           {currentMenuItems.map((item, index) => {
             if ('divider' in item) {
-              return <div key={index} className="h-px bg-blue-700 my-4" />;
+              return <div key={index} style={{ height: '1px', backgroundColor: 'rgba(255,255,255,0.15)', margin: '8px 0' }} />;
             }
 
+            const isActive = activeTab === item.id;
             return (
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id!)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-left ${activeTab === item.id
-                  ? 'bg-orange-500 text-white shadow-lg'
-                  : 'text-blue-100 hover:bg-blue-700/50'
-                  }`}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '12px 16px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  transition: 'background-color 0.15s ease, color 0.15s ease',
+                  WebkitTapHighlightColor: 'transparent',
+                  ...(isActive ? activeStyle : inactiveStyle),
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'rgba(255,255,255,0.15)';
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'transparent';
+                }}
               >
-                <span className="text-xl">{item.icon}</span>
-                <span className="font-medium">{item.label}</span>
+                <span style={{ fontSize: '18px', minWidth: '22px', textAlign: 'center' }}>{item.icon}</span>
+                <span>{item.label}</span>
               </button>
             );
           })}
         </div>
       </nav>
 
-      <div className="p-4 border-t border-blue-700">
-        <div className="bg-blue-700/50 rounded-lg p-4">
-          <p className="text-sm text-blue-300">Logged in as:</p>
-          <div className="flex justify-between items-center mt-1">
-            <div>
-              <p className="font-semibold capitalize leading-tight">{currentUser || 'Guest'}</p>
-              <p className="text-xs text-blue-400 mt-0.5">
+      {/* User info + logout */}
+      <div style={{ padding: '16px', borderTop: '1px solid rgba(255,255,255,0.15)' }}>
+        <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '8px', padding: '12px' }}>
+          <p style={{ fontSize: '12px', color: '#93c5fd', margin: '0 0 4px 0' }}>Logged in as:</p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+            <div style={{ minWidth: 0 }}>
+              <p style={{ fontWeight: '600', margin: 0, color: '#fff', textTransform: 'capitalize', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {currentUser || 'Guest'}
+              </p>
+              <p style={{ fontSize: '11px', color: '#7dd3fc', margin: '2px 0 0 0' }}>
                 {isViewer ? '👁️ Viewer' : isAdmin ? '🔴 PDRRMO Admin' : 'LGU User'}
               </p>
             </div>
             <button
               onClick={onLogout}
-              className="text-xs bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded transition-colors"
-              title="Sign Out"
+              style={{
+                fontSize: '12px', backgroundColor: '#ef4444', color: '#ffffff',
+                padding: '4px 10px', borderRadius: '6px', border: 'none',
+                cursor: 'pointer', whiteSpace: 'nowrap', fontWeight: '500',
+                flexShrink: 0,
+              }}
             >
               Sign Out
             </button>
           </div>
         </div>
       </div>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .sidebar-close-btn {
+            display: flex !important;
+          }
+        }
+      `}</style>
     </aside>
   );
 }

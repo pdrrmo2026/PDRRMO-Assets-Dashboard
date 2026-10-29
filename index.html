@@ -2,8 +2,17 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Proper viewport for all devices including Smart TVs and old phones -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    <!-- IE compatibility (forces latest rendering engine) -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!-- Mobile browser chrome color -->
+    <meta name="theme-color" content="#1e3a8a" />
+    <!-- Prevent auto-zoom on input focus (iOS) -->
+    <meta name="format-detection" content="telephone=no" />
     <title>DRRM Resource Management System - MDRRMO/PDRRMO Dashboard</title>
+    <!-- Preconnect for faster font loading (if fonts added later) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
   </head>
   <body>
     <div id="root"></div>
