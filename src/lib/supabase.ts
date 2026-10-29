@@ -1,14 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Fallback to hardcoded values so the app works on Vercel even without env vars set
+const supabaseUrl =
+  import.meta.env.VITE_SUPABASE_URL ||
+  'https://lfqsqqvyxxfrwyoyvcrj.supabase.co';
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    'Missing Supabase environment variables. ' +
-    'Tiyaking naka-set ang VITE_SUPABASE_URL at VITE_SUPABASE_ANON_KEY sa iyong .env file.'
-  );
-}
+const supabaseAnonKey =
+  import.meta.env.VITE_SUPABASE_ANON_KEY ||
+  'sb_publishable_N7Lf1J_VIfgqrZTvtg6V0Q_keB7-o2V';
 
 // Using untyped client to avoid 'never' type conflicts with strict generics.
 // Type safety is handled at the mapper layer in db.ts instead.
