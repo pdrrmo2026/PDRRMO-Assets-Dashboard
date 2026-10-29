@@ -78,7 +78,7 @@ export function PasswordModal({ isOpen, onClose, onConfirm, title = "Authenticat
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-[60]" style={{backgroundColor:'rgba(0,0,0,0.7)'}} onClick={onClose}>
+    <div className="fixed inset-0 flex items-center justify-center" style={{backgroundColor:'rgba(0,0,0,0.7)',zIndex:60}} onClick={onClose}>
       <div className="bg-white rounded-xl p-6 w-96 shadow-2xl border-2 border-amber-200" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center gap-3 mb-4">
           <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
@@ -672,7 +672,7 @@ export default function ResourceList({ type, data, onUpdate, onDelete, currentUs
 
     return (
       <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{backgroundColor:'rgba(0,0,0,0.5)'}} onClick={closeModal}>
-        <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="bg-white rounded-2xl shadow-2xl w-full overflow-y-auto" style={{maxWidth:'672px',maxHeight:'90vh'}} onClick={(e) => e.stopPropagation()}>
           {/* Header */}
           <div className={`bg-gradient-to-r ${headerGradient} text-white p-6 rounded-t-2xl`}>
             <div className="flex items-center justify-between">

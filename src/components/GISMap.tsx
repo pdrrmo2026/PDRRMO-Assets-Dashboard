@@ -315,8 +315,8 @@ export default function GISMap({ equipment, vehicles, personnel, acdvData }: GIS
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <div 
           ref={mapRef} 
-          className="w-full h-[600px]"
-          style={{ background: '#E5E7EB' }}
+          className="w-full"
+          style={{ background: '#E5E7EB', height: '600px' }}
         >
           {!mapLoaded && (
             <div className="w-full h-full flex items-center justify-center">
