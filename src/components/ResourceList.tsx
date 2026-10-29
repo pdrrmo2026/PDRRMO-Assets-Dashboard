@@ -78,7 +78,7 @@ export function PasswordModal({ isOpen, onClose, onConfirm, title = "Authenticat
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60]" onClick={onClose}>
+    <div className="fixed inset-0 flex items-center justify-center z-[60]" style={{backgroundColor:'rgba(0,0,0,0.7)'}} onClick={onClose}>
       <div className="bg-white rounded-xl p-6 w-96 shadow-2xl border-2 border-amber-200" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center gap-3 mb-4">
           <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
@@ -671,13 +671,13 @@ export default function ResourceList({ type, data, onUpdate, onDelete, currentUs
                           'from-orange-500 to-orange-600';
 
     return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={closeModal}>
+      <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{backgroundColor:'rgba(0,0,0,0.5)'}} onClick={closeModal}>
         <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
           {/* Header */}
           <div className={`bg-gradient-to-r ${headerGradient} text-white p-6 rounded-t-2xl`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center text-3xl">
+                <div className="w-16 h-16 rounded-xl flex items-center justify-center text-3xl" style={{background:'rgba(255,255,255,0.2)'}}>
                   {iconMap[type]}
                 </div>
                 <div>
@@ -688,7 +688,7 @@ export default function ResourceList({ type, data, onUpdate, onDelete, currentUs
                          type === 'vehicles' ? `${selectedItem.brand} ${selectedItem.model}` : 
                          selectedItem.name}
                       </h2>
-                      <p className="text-white/80 text-sm mt-1">
+                      <p style={{color:'rgba(255,255,255,0.85)'}} className="text-sm mt-1">
                         {type === 'equipment' ? 'Equipment Details' : 
                          type === 'vehicles' ? 'Vehicle Details' : 'Personnel Details'}
                       </p>
@@ -698,7 +698,7 @@ export default function ResourceList({ type, data, onUpdate, onDelete, currentUs
                   )}
                 </div>
               </div>
-              <button onClick={closeModal} className="text-white/80 hover:text-white text-2xl">&times;</button>
+              <button onClick={closeModal} style={{color:'rgba(255,255,255,0.85)',background:'none',border:'none',cursor:'pointer',fontSize:'24px',lineHeight:1}} onMouseOver={e=>(e.currentTarget.style.color='#fff')} onMouseOut={e=>(e.currentTarget.style.color='rgba(255,255,255,0.85)')}>&times;</button>
             </div>
           </div>
 

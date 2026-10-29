@@ -50,7 +50,7 @@ export default function Login({ onLogin }: LoginProps) {
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-700 to-blue-800 text-white p-8 text-center">
-          <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4" style={{background:'rgba(255,255,255,0.2)'}}>
             <span className="text-4xl">🏛️</span>
           </div>
           <h1 className="text-2xl font-bold">DRRM Resource Management</h1>

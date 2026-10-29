@@ -38,7 +38,7 @@ function PasswordModal({ isOpen, onClose, onConfirm, title = "Authentication Req
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60]" onClick={onClose}>
+    <div className="fixed inset-0 flex items-center justify-center z-[60]" style={{backgroundColor:'rgba(0,0,0,0.7)'}} onClick={onClose}>
       <div className="bg-white rounded-xl p-6 w-96 shadow-2xl border-2 border-amber-200" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center gap-3 mb-4">
           <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
@@ -199,13 +199,13 @@ export default function ACDVList({ acdvData, onUpdate, onDelete, currentUserLguC
 
       {/* Detail Modal */}
       {selectedACDV && editFormData && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={closeModal}>
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{backgroundColor:'rgba(0,0,0,0.5)'}} onClick={closeModal}>
           <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             {/* Header */}
             <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white p-6 rounded-t-2xl">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center text-3xl">🤝</div>
+                  <div className="w-16 h-16 rounded-xl flex items-center justify-center text-3xl" style={{background:'rgba(255,255,255,0.2)'}}>🤝</div>
                   <div>
                     {!isEditing ? (
                       <>
@@ -217,7 +217,7 @@ export default function ACDVList({ acdvData, onUpdate, onDelete, currentUserLguC
                     )}
                   </div>
                 </div>
-                <button onClick={closeModal} className="text-white/80 hover:text-white text-2xl">&times;</button>
+                <button onClick={closeModal} style={{color:'rgba(255,255,255,0.85)',background:'none',border:'none',cursor:'pointer',fontSize:'24px',lineHeight:1}} onMouseOver={e=>(e.currentTarget.style.color='#fff')} onMouseOut={e=>(e.currentTarget.style.color='rgba(255,255,255,0.85)')}>&times;</button>
               </div>
             </div>
 

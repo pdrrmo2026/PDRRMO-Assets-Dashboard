@@ -730,9 +730,11 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
                 setDownloadType('equipment');
                 generateCSV('all');
               }}
-              className="w-full mt-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+              style={{width:'100%',marginTop:'16px',padding:'8px 0',background:'rgba(255,255,255,0.2)',borderRadius:'8px',color:'#fff',border:'1px solid rgba(255,255,255,0.4)',cursor:'pointer',fontWeight:'600',fontSize:'14px'}}
+              onMouseOver={e=>(e.currentTarget.style.background='rgba(255,255,255,0.35)')}
+              onMouseOut={e=>(e.currentTarget.style.background='rgba(255,255,255,0.2)')}
             >
-              Download Equipment CSV
+              ⬇ Download Equipment CSV
             </button>
           )}
         </div>
@@ -752,9 +754,11 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
                 setDownloadType('vehicles');
                 generateCSV('all');
               }}
-              className="w-full mt-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+              style={{width:'100%',marginTop:'16px',padding:'8px 0',background:'rgba(255,255,255,0.2)',borderRadius:'8px',color:'#fff',border:'1px solid rgba(255,255,255,0.4)',cursor:'pointer',fontWeight:'600',fontSize:'14px'}}
+              onMouseOver={e=>(e.currentTarget.style.background='rgba(255,255,255,0.35)')}
+              onMouseOut={e=>(e.currentTarget.style.background='rgba(255,255,255,0.2)')}
             >
-              Download Vehicles CSV
+              ⬇ Download Vehicles CSV
             </button>
           )}
         </div>
@@ -774,9 +778,11 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
                 setDownloadType('personnel');
                 generateCSV('all');
               }}
-              className="w-full mt-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+              style={{width:'100%',marginTop:'16px',padding:'8px 0',background:'rgba(255,255,255,0.2)',borderRadius:'8px',color:'#fff',border:'1px solid rgba(255,255,255,0.4)',cursor:'pointer',fontWeight:'600',fontSize:'14px'}}
+              onMouseOver={e=>(e.currentTarget.style.background='rgba(255,255,255,0.35)')}
+              onMouseOut={e=>(e.currentTarget.style.background='rgba(255,255,255,0.2)')}
             >
-              Download Personnel CSV
+              ⬇ Download Personnel CSV
             </button>
           )}
         </div>
@@ -796,9 +802,11 @@ export default function AgencyDownloads({ equipment, vehicles, personnel, acdvDa
                 setDownloadType('acdv');
                 generateCSV('all');
               }}
-              className="w-full mt-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+              style={{width:'100%',marginTop:'16px',padding:'8px 0',background:'rgba(255,255,255,0.2)',borderRadius:'8px',color:'#fff',border:'1px solid rgba(255,255,255,0.4)',cursor:'pointer',fontWeight:'600',fontSize:'14px'}}
+              onMouseOver={e=>(e.currentTarget.style.background='rgba(255,255,255,0.35)')}
+              onMouseOut={e=>(e.currentTarget.style.background='rgba(255,255,255,0.2)')}
             >
-              Download ACDV CSV
+              ⬇ Download ACDV CSV
             </button>
           )}
         </div>
