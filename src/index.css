@@ -297,8 +297,7 @@ input:focus, select:focus, textarea:focus {
 button {
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  border: none;
-  background: none;
+  /* Do NOT reset background/border here — it breaks Tailwind button classes */
 }
 
 /* ---- Transitions ---- */
@@ -334,3 +333,155 @@ button {
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: #f1f1f1; }
 ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; }
+
+/* ============================================================
+   EXPLICIT BUTTON STYLES — fallback for browsers that don't
+   support CSS custom properties (var()). These rules use the
+   same selectors as Tailwind utilities but with direct hex
+   values so old browsers (Smart TVs, old Android/iOS) can
+   render them correctly.
+   ============================================================ */
+
+/* Blue buttons (Save, primary actions) */
+.bg-blue-600  { background-color: #2563eb !important; }
+.bg-blue-700  { background-color: #1d4ed8 !important; }
+.bg-blue-800  { background-color: #1e40af !important; }
+.bg-blue-900  { background-color: #1e3a8a !important; }
+.bg-blue-50   { background-color: #eff6ff !important; }
+.bg-blue-100  { background-color: #dbeafe !important; }
+.hover\:bg-blue-700:hover  { background-color: #1d4ed8 !important; }
+.hover\:bg-blue-800:hover  { background-color: #1e40af !important; }
+
+/* Green buttons (Download CSV, success) */
+.bg-green-600 { background-color: #16a34a !important; }
+.bg-green-700 { background-color: #15803d !important; }
+.bg-green-500 { background-color: #22c55e !important; }
+.bg-green-100 { background-color: #dcfce7 !important; }
+.bg-green-50  { background-color: #f0fdf4 !important; }
+.hover\:bg-green-700:hover { background-color: #15803d !important; }
+
+/* Red buttons (Delete, Print PDF, danger) */
+.bg-red-600   { background-color: #dc2626 !important; }
+.bg-red-700   { background-color: #b91c1c !important; }
+.bg-red-100   { background-color: #fee2e2 !important; }
+.bg-red-50    { background-color: #fef2f2 !important; }
+.hover\:bg-red-700:hover   { background-color: #b91c1c !important; }
+.hover\:bg-red-800:hover   { background-color: #991b1b !important; }
+
+/* Orange buttons */
+.bg-orange-600 { background-color: #ea580c !important; }
+.bg-orange-500 { background-color: #f97316 !important; }
+.bg-orange-100 { background-color: #ffedd5 !important; }
+.hover\:bg-orange-700:hover { background-color: #c2410c !important; }
+
+/* Purple buttons (ACDV) */
+.bg-purple-600 { background-color: #9333ea !important; }
+.bg-purple-700 { background-color: #7e22ce !important; }
+.bg-purple-100 { background-color: #f3e8ff !important; }
+.hover\:bg-purple-700:hover { background-color: #7e22ce !important; }
+
+/* Amber / Yellow buttons */
+.bg-amber-500  { background-color: #f59e0b !important; }
+.bg-amber-100  { background-color: #fef3c7 !important; }
+.bg-yellow-400 { background-color: #fbbf24 !important; }
+
+/* Gray buttons (Clear Form, cancel) */
+.bg-gray-50   { background-color: #f9fafb !important; }
+.bg-gray-100  { background-color: #f3f4f6 !important; }
+.bg-gray-200  { background-color: #e5e7eb !important; }
+.bg-gray-800  { background-color: #1f2937 !important; }
+.hover\:bg-gray-50:hover   { background-color: #f9fafb !important; }
+.hover\:bg-gray-100:hover  { background-color: #f3f4f6 !important; }
+.hover\:bg-gray-200:hover  { background-color: #e5e7eb !important; }
+
+/* White background */
+.bg-white     { background-color: #ffffff !important; }
+.hover\:bg-white:hover { background-color: #ffffff !important; }
+
+/* Text colors */
+.text-white   { color: #ffffff !important; }
+.text-gray-700 { color: #374151 !important; }
+.text-gray-800 { color: #1f2937 !important; }
+.text-blue-600 { color: #2563eb !important; }
+.text-blue-700 { color: #1d4ed8 !important; }
+.text-green-600 { color: #16a34a !important; }
+.text-green-700 { color: #15803d !important; }
+.text-red-600  { color: #dc2626 !important; }
+.text-red-700  { color: #b91c1c !important; }
+.text-orange-600 { color: #ea580c !important; }
+.text-orange-700 { color: #c2410c !important; }
+.text-purple-600 { color: #9333ea !important; }
+.text-purple-700 { color: #7e22ce !important; }
+.text-amber-600 { color: #d97706 !important; }
+.text-gray-500 { color: #6b7280 !important; }
+.text-gray-600 { color: #4b5563 !important; }
+
+/* Border colors */
+.border-gray-300 { border-color: #d1d5db !important; }
+.border-gray-200 { border-color: #e5e7eb !important; }
+.border-blue-500 { border-color: #3b82f6 !important; }
+.border-amber-200 { border-color: #fde68a !important; }
+
+/* Gradient backgrounds — direct hex fallbacks */
+.from-blue-600  { --tw-gradient-from: #2563eb; }
+.from-blue-700  { --tw-gradient-from: #1d4ed8; }
+.from-blue-800  { --tw-gradient-from: #1e40af; }
+.from-blue-900  { --tw-gradient-from: #1e3a8a; }
+.from-green-500 { --tw-gradient-from: #22c55e; }
+.from-green-600 { --tw-gradient-from: #16a34a; }
+.from-orange-500 { --tw-gradient-from: #f97316; }
+.from-purple-600 { --tw-gradient-from: #9333ea; }
+.to-blue-700    { --tw-gradient-to: #1d4ed8; }
+.to-blue-800    { --tw-gradient-to: #1e40af; }
+.to-blue-900    { --tw-gradient-to: #1e3a8a; }
+.to-green-600   { --tw-gradient-to: #16a34a; }
+.to-orange-600  { --tw-gradient-to: #ea580c; }
+.to-purple-700  { --tw-gradient-to: #7e22ce; }
+
+/* Gradient fallback for browsers without CSS variable support */
+.bg-gradient-to-r.from-blue-700.to-blue-800,
+.bg-gradient-to-br.from-blue-900.to-blue-800 {
+  background: -webkit-linear-gradient(left, #1d4ed8, #1e40af);
+  background: linear-gradient(to right, #1d4ed8, #1e40af);
+}
+.bg-gradient-to-br.from-blue-500.to-blue-600 {
+  background: -webkit-linear-gradient(135deg, #3b82f6, #2563eb);
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+.bg-gradient-to-br.from-green-500.to-green-600 {
+  background: -webkit-linear-gradient(135deg, #22c55e, #16a34a);
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+.bg-gradient-to-br.from-orange-500.to-orange-600 {
+  background: -webkit-linear-gradient(135deg, #f97316, #ea580c);
+  background: linear-gradient(135deg, #f97316, #ea580c);
+}
+.bg-gradient-to-br.from-purple-500.to-purple-600 {
+  background: -webkit-linear-gradient(135deg, #a855f7, #9333ea);
+  background: linear-gradient(135deg, #a855f7, #9333ea);
+}
+.bg-gradient-to-r.from-purple-600.to-purple-700 {
+  background: -webkit-linear-gradient(left, #9333ea, #7e22ce);
+  background: linear-gradient(to right, #9333ea, #7e22ce);
+}
+.bg-gradient-to-br.from-blue-600.to-blue-700,
+.bg-gradient-to-r.from-blue-600.to-blue-700 {
+  background: -webkit-linear-gradient(135deg, #2563eb, #1d4ed8);
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+
+/* Ensure buttons with bg classes show border + text correctly */
+button.bg-blue-600, button.bg-green-600, button.bg-red-600,
+button.bg-orange-600, button.bg-purple-600, button.bg-gray-600,
+button.bg-blue-700, button.bg-green-700, button.bg-red-700 {
+  border: none;
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
