@@ -10,7 +10,7 @@ import AgencyDownloads from './components/AgencyDownloads';
 import ACDVForm from './components/ACDVForm';
 import ACDVList from './components/ACDVList';
 import Login from './components/Login';
-import { Equipment, Vehicle, Personnel, ACDV, TabType, LGUCode } from './types';
+import { Equipment, Vehicle, Personnel, ACDV, TabType, LGUCode, ActivityLog } from './types';
 import {
   fetchEquipment, insertEquipment, updateEquipmentInDB, deleteEquipment,
   fetchVehicles, insertVehicle, updateVehicleInDB, deleteVehicle,
@@ -24,6 +24,39 @@ import {
   initialACDV,
 } from './data/initialData';
 
+function dedupeItems<T extends { id: string; name?: string }>(items: T[]): T[] {
+  const seenId = new Set<string>();
+  const seenName = new Set<string>();
+  const res: T[] = [];
+  for (const item of items) {
+    if (!item || !item.id) continue;
+    const cleanName = (item.name || '').trim().toLowerCase();
+    if (seenId.has(item.id)) continue;
+    if (cleanName && seenName.has(cleanName)) continue;
+    seenId.add(item.id);
+    if (cleanName) seenName.add(cleanName);
+    res.push({
+      ...item,
+      name: item.name ? item.name.trim() : item.name
+    });
+  }
+  return res;
+}
+
+function dedupeVehicles(items: Vehicle[]): Vehicle[] {
+  const seen = new Set<string>();
+  const res: Vehicle[] = [];
+  for (const v of items) {
+    if (!v || !v.id) continue;
+    const key = (v.plateNumber?.trim() || `${v.brand}_${v.model}_${v.agency}`).toLowerCase();
+    if (seen.has(v.id) || seen.has(key)) continue;
+    seen.add(v.id);
+    seen.add(key);
+    res.push(v);
+  }
+  return res;
+}
+
 function getInitialData<T>(key: string, baseline: T): T {
   try {
     const raw = localStorage.getItem(key);
@@ -35,6 +68,77 @@ function getInitialData<T>(key: string, baseline: T): T {
     console.error('Error reading localStorage for ' + key, e);
   }
   return baseline;
+}
+
+function getInitialActivityLogs(
+  eqList: Equipment[],
+  vehList: Vehicle[],
+  perList: Personnel[]
+): ActivityLog[] {
+  try {
+    const raw = localStorage.getItem('pdrrmo_activity_logs');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch {}
+
+  const logs: ActivityLog[] = [];
+  const seen = new Set<string>();
+
+  perList.forEach((p, idx) => {
+    const cleanName = p.name.trim();
+    const key = `personnel_${cleanName.toLowerCase()}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      logs.push({
+        id: `init-p-${idx}`,
+        type: 'personnel',
+        action: 'Added',
+        name: cleanName,
+        agency: p.agency,
+        date: p.dateAdded || '2026-07-01',
+      });
+    }
+  });
+
+  vehList.forEach((v, idx) => {
+    const name = `${v.brand} ${v.model}`.trim();
+    const key = `vehicle_${name.toLowerCase()}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      logs.push({
+        id: `init-v-${idx}`,
+        type: 'vehicle',
+        action: 'Added',
+        name: name,
+        agency: v.agency,
+        date: v.dateAdded || '2026-06-30',
+      });
+    }
+  });
+
+  eqList.forEach((e, idx) => {
+    const cleanName = e.name.trim();
+    const key = `equipment_${cleanName.toLowerCase()}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      logs.push({
+        id: `init-e-${idx}`,
+        type: 'equipment',
+        action: 'Added',
+        name: cleanName,
+        agency: e.agency,
+        date: e.dateAdded || '2026-06-10',
+      });
+    }
+  });
+
+  logs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  try {
+    localStorage.setItem('pdrrmo_activity_logs', JSON.stringify(logs));
+  } catch {}
+  return logs;
 }
 
 export default function App() {
@@ -57,17 +161,29 @@ export default function App() {
     } catch {}
   }, []);
 
-  // Baseline data loaded immediately from initialData + localStorage cache
-  const [equipment, setEquipment] = useState<Equipment[]>(() => getInitialData('pdrrmo_cached_equipment', initialEquipment));
-  const [vehicles, setVehicles] = useState<Vehicle[]>(() => getInitialData('pdrrmo_cached_vehicles', initialVehicles));
-  const [personnel, setPersonnel] = useState<Personnel[]>(() => getInitialData('pdrrmo_cached_personnel', initialPersonnel));
+  // Baseline data loaded immediately from initialData + localStorage cache (deduplicated)
+  const [equipment, setEquipment] = useState<Equipment[]>(() => dedupeItems(getInitialData('pdrrmo_cached_equipment', initialEquipment)));
+  const [vehicles, setVehicles] = useState<Vehicle[]>(() => dedupeVehicles(getInitialData('pdrrmo_cached_vehicles', initialVehicles)));
+  const [personnel, setPersonnel] = useState<Personnel[]>(() => dedupeItems(getInitialData('pdrrmo_cached_personnel', initialPersonnel)));
   const [acdvData, setACDVData] = useState<ACDV[]>(() => getInitialData('pdrrmo_cached_acdvData', initialACDV));
+
+  // Activity logs with full history (both additions & edits preserved permanently)
+  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>(() =>
+    getInitialActivityLogs(initialEquipment, initialVehicles, initialPersonnel)
+  );
 
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [dbOffline, setDbOffline] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Sync activity logs to localStorage
+  useEffect(() => {
+    if (activityLogs.length > 0) {
+      try { localStorage.setItem('pdrrmo_activity_logs', JSON.stringify(activityLogs)); } catch {}
+    }
+  }, [activityLogs]);
 
   // Sync to local cache whenever state changes
   useEffect(() => {
@@ -110,9 +226,9 @@ export default function App() {
         fetchPersonnel(),
         fetchACDV(),
       ]);
-      setEquipment(eq);
-      setVehicles(veh);
-      setPersonnel(pers);
+      setEquipment(dedupeItems(eq));
+      setVehicles(dedupeVehicles(veh));
+      setPersonnel(dedupeItems(pers));
       setACDVData(acdv);
       setDbOffline(false);
       setRetryCount(0);
@@ -205,7 +321,17 @@ export default function App() {
   const addEquipment = async (item: Omit<Equipment, 'id' | 'dateAdded'>) => {
     try {
       const saved = await insertEquipment(item);
-      setEquipment((prev) => [saved, ...prev]);
+      setEquipment((prev) => dedupeItems([saved, ...prev]));
+      const newLog: ActivityLog = {
+        id: 'log-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+        type: 'equipment',
+        action: 'Added',
+        name: saved.name.trim(),
+        agency: saved.agency,
+        date: saved.dateAdded || new Date().toISOString().split('T')[0],
+        timestamp: Date.now(),
+      };
+      setActivityLogs((prev) => [newLog, ...prev]);
     } catch (err: any) {
       alert(`Error saving equipment: ` + (err?.message ?? err));
     }
@@ -214,7 +340,17 @@ export default function App() {
   const addVehicle = async (item: Omit<Vehicle, 'id' | 'dateAdded'>) => {
     try {
       const saved = await insertVehicle(item);
-      setVehicles((prev) => [saved, ...prev]);
+      setVehicles((prev) => dedupeVehicles([saved, ...prev]));
+      const newLog: ActivityLog = {
+        id: 'log-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+        type: 'vehicle',
+        action: 'Added',
+        name: `${saved.brand} ${saved.model}`.trim(),
+        agency: saved.agency,
+        date: saved.dateAdded || new Date().toISOString().split('T')[0],
+        timestamp: Date.now(),
+      };
+      setActivityLogs((prev) => [newLog, ...prev]);
     } catch (err: any) {
       alert(`Error saving vehicle: ` + (err?.message ?? err));
     }
@@ -223,7 +359,17 @@ export default function App() {
   const addPersonnel = async (item: Omit<Personnel, 'id' | 'dateAdded'>) => {
     try {
       const saved = await insertPersonnel(item);
-      setPersonnel((prev) => [saved, ...prev]);
+      setPersonnel((prev) => dedupeItems([saved, ...prev]));
+      const newLog: ActivityLog = {
+        id: 'log-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+        type: 'personnel',
+        action: 'Added',
+        name: saved.name.trim(),
+        agency: saved.agency,
+        date: saved.dateAdded || new Date().toISOString().split('T')[0],
+        timestamp: Date.now(),
+      };
+      setActivityLogs((prev) => [newLog, ...prev]);
     } catch (err: any) {
       alert(`Error saving personnel: ` + (err?.message ?? err));
     }
@@ -233,16 +379,36 @@ export default function App() {
     try {
       const saved = await insertACDV(item);
       setACDVData((prev) => [saved, ...prev]);
+      const newLog: ActivityLog = {
+        id: 'log-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+        type: 'acdv',
+        action: 'Added',
+        name: saved.organizationName.trim(),
+        agency: saved.registeredLGU,
+        date: saved.dateAdded || new Date().toISOString().split('T')[0],
+        timestamp: Date.now(),
+      };
+      setActivityLogs((prev) => [newLog, ...prev]);
     } catch (err: any) {
       alert(`Error saving acdv: ` + (err?.message ?? err));
     }
   };
 
-  // ── Update handlers (save edits to Supabase + update local state) ──
+  // ── Update handlers (save edits to Supabase + record edit in activity logs) ──
   const updateEquipment = async (updatedItem: Equipment) => {
     try {
       const saved = await updateEquipmentInDB(updatedItem);
-      setEquipment((prev) => prev.map((item) => item.id === saved.id ? saved : item));
+      setEquipment((prev) => dedupeItems(prev.map((item) => item.id === saved.id ? saved : item)));
+      const editLog: ActivityLog = {
+        id: 'log-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+        type: 'equipment',
+        action: 'Updated',
+        name: saved.name.trim(),
+        agency: saved.agency,
+        date: new Date().toISOString().split('T')[0],
+        timestamp: Date.now(),
+      };
+      setActivityLogs((prev) => [editLog, ...prev]);
     } catch (err: any) {
       alert('Error updating equipment: ' + (err?.message ?? err));
     }
@@ -251,7 +417,17 @@ export default function App() {
   const updateVehicle = async (updatedItem: Vehicle) => {
     try {
       const saved = await updateVehicleInDB(updatedItem);
-      setVehicles((prev) => prev.map((item) => item.id === saved.id ? saved : item));
+      setVehicles((prev) => dedupeVehicles(prev.map((item) => item.id === saved.id ? saved : item)));
+      const editLog: ActivityLog = {
+        id: 'log-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+        type: 'vehicle',
+        action: 'Updated',
+        name: `${saved.brand} ${saved.model}`.trim(),
+        agency: saved.agency,
+        date: new Date().toISOString().split('T')[0],
+        timestamp: Date.now(),
+      };
+      setActivityLogs((prev) => [editLog, ...prev]);
     } catch (err: any) {
       alert('Error updating vehicle: ' + (err?.message ?? err));
     }
@@ -260,7 +436,17 @@ export default function App() {
   const updatePersonnel = async (updatedItem: Personnel) => {
     try {
       const saved = await updatePersonnelInDB(updatedItem);
-      setPersonnel((prev) => prev.map((item) => item.id === saved.id ? saved : item));
+      setPersonnel((prev) => dedupeItems(prev.map((item) => item.id === saved.id ? saved : item)));
+      const editLog: ActivityLog = {
+        id: 'log-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+        type: 'personnel',
+        action: 'Updated',
+        name: saved.name.trim(),
+        agency: saved.agency,
+        date: new Date().toISOString().split('T')[0],
+        timestamp: Date.now(),
+      };
+      setActivityLogs((prev) => [editLog, ...prev]);
     } catch (err: any) {
       alert('Error updating personnel: ' + (err?.message ?? err));
     }
@@ -270,6 +456,16 @@ export default function App() {
     try {
       const saved = await updateACDVInDB(updatedItem);
       setACDVData((prev) => prev.map((item) => item.id === saved.id ? saved : item));
+      const editLog: ActivityLog = {
+        id: 'log-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+        type: 'acdv',
+        action: 'Updated',
+        name: saved.organizationName.trim(),
+        agency: saved.registeredLGU,
+        date: new Date().toISOString().split('T')[0],
+        timestamp: Date.now(),
+      };
+      setActivityLogs((prev) => [editLog, ...prev]);
     } catch (err: any) {
       alert('Error updating ACDV: ' + (err?.message ?? err));
     }
@@ -277,8 +473,21 @@ export default function App() {
 
   const deleteEquipmentItem = async (id: string) => {
     try {
+      const itemToDelete = equipment.find((e) => e.id === id);
       await deleteEquipment(id);
       setEquipment((prev) => prev.filter((item) => item.id !== id));
+      if (itemToDelete) {
+        const delLog: ActivityLog = {
+          id: 'log-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+          type: 'equipment',
+          action: 'Deleted',
+          name: itemToDelete.name.trim(),
+          agency: itemToDelete.agency,
+          date: new Date().toISOString().split('T')[0],
+          timestamp: Date.now(),
+        };
+        setActivityLogs((prev) => [delLog, ...prev]);
+      }
     } catch (err: any) {
       alert('Error deleting equipment: ' + (err?.message ?? err));
     }
@@ -286,8 +495,21 @@ export default function App() {
 
   const deleteVehicleItem = async (id: string) => {
     try {
+      const itemToDelete = vehicles.find((v) => v.id === id);
       await deleteVehicle(id);
       setVehicles((prev) => prev.filter((item) => item.id !== id));
+      if (itemToDelete) {
+        const delLog: ActivityLog = {
+          id: 'log-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+          type: 'vehicle',
+          action: 'Deleted',
+          name: `${itemToDelete.brand} ${itemToDelete.model}`.trim(),
+          agency: itemToDelete.agency,
+          date: new Date().toISOString().split('T')[0],
+          timestamp: Date.now(),
+        };
+        setActivityLogs((prev) => [delLog, ...prev]);
+      }
     } catch (err: any) {
       alert('Error deleting vehicle: ' + (err?.message ?? err));
     }
@@ -295,8 +517,21 @@ export default function App() {
 
   const deletePersonnelItem = async (id: string) => {
     try {
+      const itemToDelete = personnel.find((p) => p.id === id);
       await deletePersonnel(id);
       setPersonnel((prev) => prev.filter((item) => item.id !== id));
+      if (itemToDelete) {
+        const delLog: ActivityLog = {
+          id: 'log-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+          type: 'personnel',
+          action: 'Deleted',
+          name: itemToDelete.name.trim(),
+          agency: itemToDelete.agency,
+          date: new Date().toISOString().split('T')[0],
+          timestamp: Date.now(),
+        };
+        setActivityLogs((prev) => [delLog, ...prev]);
+      }
     } catch (err: any) {
       alert('Error deleting personnel: ' + (err?.message ?? err));
     }
@@ -304,8 +539,21 @@ export default function App() {
 
   const deleteACDVItem = async (id: string) => {
     try {
+      const itemToDelete = acdvData.find((a) => a.id === id);
       await deleteACDV(id);
       setACDVData((prev) => prev.filter((item) => item.id !== id));
+      if (itemToDelete) {
+        const delLog: ActivityLog = {
+          id: 'log-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+          type: 'acdv',
+          action: 'Deleted',
+          name: itemToDelete.organizationName.trim(),
+          agency: itemToDelete.registeredLGU,
+          date: new Date().toISOString().split('T')[0],
+          timestamp: Date.now(),
+        };
+        setActivityLogs((prev) => [delLog, ...prev]);
+      }
     } catch (err: any) {
       alert('Error deleting ACDV: ' + (err?.message ?? err));
     }
@@ -324,7 +572,7 @@ export default function App() {
 
     switch (activeTab) {
       case 'dashboard':
-        return <Dashboard equipment={equipment} vehicles={vehicles} personnel={personnel} />;
+        return <Dashboard equipment={equipment} vehicles={vehicles} personnel={personnel} activityLogs={activityLogs} />;
       case 'equipment-form':
         return <EquipmentForm onSubmit={addEquipment} currentUserLguCode={currentUserLguCode} isAdmin={isAdmin} />;
       case 'vehicle-form':

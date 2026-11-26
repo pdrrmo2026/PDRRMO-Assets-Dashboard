@@ -1,12 +1,18 @@
-import { Equipment, Vehicle, Personnel, RIZAL_LGUS } from '../types';
+import { useState } from 'react';
+import { Equipment, Vehicle, Personnel, RIZAL_LGUS, ActivityLog } from '../types';
 
 interface DashboardProps {
   equipment: Equipment[];
   vehicles: Vehicle[];
   personnel: Personnel[];
+  activityLogs?: ActivityLog[];
 }
 
-export default function Dashboard({ equipment, vehicles, personnel }: DashboardProps) {
+export default function Dashboard({ equipment, vehicles, personnel, activityLogs = [] }: DashboardProps) {
+  const [showAllLogsModal, setShowAllLogsModal] = useState(false);
+  const [logSearchQuery, setLogSearchQuery] = useState('');
+  const [logTypeFilter, setLogTypeFilter] = useState<'all' | 'equipment' | 'vehicle' | 'personnel'>('all');
+
   const totalEquipment = equipment.reduce((sum, e) => sum + e.quantity, 0);
   const activePersonnel = personnel.filter(p => p.status === 'Active').length;
   const goodConditionVehicles = vehicles.filter(v => v.condition === 'Good').reduce((sum, v) => sum + (v.quantity || 1), 0);
@@ -31,11 +37,53 @@ export default function Dashboard({ equipment, vehicles, personnel }: DashboardP
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5);
 
-  const recentActivity = [
-    ...equipment.map(e => ({ type: 'equipment' as const, name: e.name, date: e.dateAdded })),
-    ...vehicles.map(v => ({ type: 'vehicle' as const, name: `${v.brand} ${v.model}`, date: v.dateAdded })),
-    ...personnel.map(p => ({ type: 'personnel' as const, name: p.name, date: p.dateAdded })),
-  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 5);
+  // Synthesize complete historical activity logs (including both created & updated logs)
+  const allLogs: ActivityLog[] = (() => {
+    if (activityLogs && activityLogs.length > 0) {
+      // Deduplicate activity logs by key
+      const seen = new Set<string>();
+      const deduped: ActivityLog[] = [];
+      for (const log of activityLogs) {
+        const key = `${log.type}_${log.action}_${(log.name || '').trim().toLowerCase()}_${log.date}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          deduped.push(log);
+        }
+      }
+      return deduped.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    }
+
+    // Baseline historical logs from all records
+    const fallbackLogs: ActivityLog[] = [
+      ...equipment.map((e, idx) => ({ id: `eq-${idx}`, type: 'equipment' as const, action: 'Added' as const, name: e.name.trim(), agency: e.agency, date: e.dateAdded })),
+      ...vehicles.map((v, idx) => ({ id: `vh-${idx}`, type: 'vehicle' as const, action: 'Added' as const, name: `${v.brand} ${v.model}`.trim(), agency: v.agency, date: v.dateAdded })),
+      ...personnel.map((p, idx) => ({ id: `pe-${idx}`, type: 'personnel' as const, action: 'Added' as const, name: p.name.trim(), agency: p.agency, date: p.dateAdded })),
+    ];
+
+    const seen = new Set<string>();
+    const cleanList: ActivityLog[] = [];
+    for (const item of fallbackLogs) {
+      const key = `${item.type}_${item.name.toLowerCase()}_${item.date}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        cleanList.push(item);
+      }
+    }
+    return cleanList.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  })();
+
+  // Top 7 most recent logs for widget
+  const recentLogs = allLogs.slice(0, 7);
+
+  // Filtered logs for "View All Logs" modal
+  const modalFilteredLogs = allLogs.filter(log => {
+    const matchType = logTypeFilter === 'all' || log.type === logTypeFilter;
+    const matchSearch = !logSearchQuery || 
+      (log.name && log.name.toLowerCase().includes(logSearchQuery.toLowerCase())) ||
+      (log.agency && log.agency.toLowerCase().includes(logSearchQuery.toLowerCase())) ||
+      (log.date && log.date.includes(logSearchQuery));
+    return matchType && matchSearch;
+  });
 
   // LGU breakdown
   const lguStats = RIZAL_LGUS.map(lgu => ({
@@ -193,31 +241,64 @@ export default function Dashboard({ equipment, vehicles, personnel }: DashboardP
           </div>
         </div>
 
-        {/* Recent Activity */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <span>📝</span> Recent Entries
-          </h2>
-          <div className="space-y-3">
-            {recentActivity.map((item, index) => (
-              <div key={index} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${
-                  item.type === 'equipment' ? 'bg-blue-100 text-blue-600' :
-                  item.type === 'vehicle' ? 'bg-green-100 text-green-600' :
-                  'bg-orange-100 text-orange-600'
-                }`}>
-                  {item.type === 'equipment' ? '🔧' : item.type === 'vehicle' ? '🚗' : '👤'}
+        {/* Recent Activity / Logs */}
+        <div className="bg-white rounded-xl shadow-sm p-6 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                <span>📝</span> Recent Activity & Logs
+              </h2>
+              <button
+                type="button"
+                onClick={() => setShowAllLogsModal(true)}
+                className="text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 font-semibold px-2.5 py-1 rounded border border-blue-200 transition-colors"
+                title="View full history of all logs and edits"
+              >
+                View All ({allLogs.length})
+              </button>
+            </div>
+            <div className="space-y-2.5">
+              {recentLogs.map((item, index) => (
+                <div key={item.id || index} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors border border-gray-100">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0 ${
+                    item.type === 'equipment' ? 'bg-blue-100 text-blue-600' :
+                    item.type === 'vehicle' ? 'bg-green-100 text-green-600' :
+                    'bg-orange-100 text-orange-600'
+                  }`}>
+                    {item.type === 'equipment' ? '🔧' : item.type === 'vehicle' ? '🚗' : '👤'}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium text-gray-800 truncate">{item.name}</p>
+                      <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
+                        item.action === 'Updated' ? 'bg-blue-100 text-blue-700' :
+                        item.action === 'Deleted' ? 'bg-red-100 text-red-700' :
+                        'bg-green-100 text-green-700'
+                      }`}>
+                        {item.action || 'Added'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-gray-400 mt-0.5">
+                      <span>{item.date}</span>
+                      {item.agency && <span>• {item.agency}</span>}
+                    </div>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-700">{item.name}</p>
-                  <p className="text-xs text-gray-400">{item.date}</p>
-                </div>
-              </div>
-            ))}
-            {recentActivity.length === 0 && (
-              <p className="text-gray-400 text-sm text-center py-4">No recent activity</p>
-            )}
+              ))}
+              {recentLogs.length === 0 && (
+                <p className="text-gray-400 text-sm text-center py-4">No recent activity</p>
+              )}
+            </div>
           </div>
+          {allLogs.length > 7 && (
+            <button
+              type="button"
+              onClick={() => setShowAllLogsModal(true)}
+              className="mt-4 w-full py-2 bg-gray-50 hover:bg-gray-100 text-gray-600 text-xs font-semibold rounded-lg border border-gray-200 transition-colors text-center"
+            >
+              📜 Tingnan Lahat ng Lumang Logs & Edits ({allLogs.length} total)
+            </button>
+          )}
         </div>
       </div>
 
@@ -298,6 +379,113 @@ export default function Dashboard({ equipment, vehicles, personnel }: DashboardP
           })}
         </div>
       </div>
+
+      {/* View All Logs Modal */}
+      {showAllLogsModal && (
+        <div className="fixed inset-0 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 70 }} onClick={() => setShowAllLogsModal(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[85vh]" onClick={e => e.stopPropagation()}>
+            <div className="bg-blue-600 text-white p-6 flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-bold flex items-center gap-2">
+                  <span>📜</span> Complete Activity & Audit Logs
+                </h3>
+                <p className="text-blue-100 text-xs mt-1">
+                  Lahat ng talaan ng na-encode, na-edit, at na-update mula sa nakaraan hanggang ngayon (hindi nawawala ang lumang logs)
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAllLogsModal(false)}
+                className="text-white hover:text-gray-200 text-2xl font-bold leading-none cursor-pointer"
+              >
+                &times;
+              </button>
+            </div>
+
+            {/* Filter and Search Bar */}
+            <div className="p-4 bg-gray-50 border-b border-gray-200 flex flex-wrap gap-3 items-center justify-between">
+              <div className="flex items-center gap-2 flex-wrap">
+                {(['all', 'equipment', 'vehicle', 'personnel'] as const).map(tab => (
+                  <button
+                    key={tab}
+                    type="button"
+                    onClick={() => setLogTypeFilter(tab)}
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${
+                      logTypeFilter === tab
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+                    }`}
+                  >
+                    {tab === 'all' ? 'Lahat (All Logs)' : tab === 'equipment' ? '🔧 Equipment' : tab === 'vehicle' ? '🚗 Vehicles' : '👤 Personnel'}
+                  </button>
+                ))}
+              </div>
+              <div className="w-full sm:w-64">
+                <input
+                  type="text"
+                  value={logSearchQuery}
+                  onChange={e => setLogSearchQuery(e.target.value)}
+                  placeholder="Mag-search sa logs..."
+                  className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
+                />
+              </div>
+            </div>
+
+            {/* Logs List Table */}
+            <div className="p-4 overflow-y-auto flex-1 space-y-2">
+              {modalFilteredLogs.length === 0 ? (
+                <div className="text-center py-8 text-gray-400 text-sm">
+                  Walang nakitang logs sa filter na ito.
+                </div>
+              ) : (
+                modalFilteredLogs.map((item, idx) => (
+                  <div key={item.id || idx} className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg hover:bg-blue-50/30 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl">
+                        {item.type === 'equipment' ? '🔧' : item.type === 'vehicle' ? '🚗' : '👤'}
+                      </span>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-gray-800 text-sm">{item.name}</span>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                            item.action === 'Updated' ? 'bg-blue-100 text-blue-700' :
+                            item.action === 'Deleted' ? 'bg-red-100 text-red-700' :
+                            'bg-green-100 text-green-700'
+                          }`}>
+                            {item.action || 'Added'}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          Uri: <span className="capitalize">{item.type}</span> {item.agency ? `• LGU / Agency: ${item.agency}` : ''}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <span className="text-xs font-semibold text-gray-600 bg-gray-100 px-2.5 py-1 rounded">
+                        📅 {item.date}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+              <span className="text-xs text-gray-500 font-medium">
+                Ipinapakita: {modalFilteredLogs.length} sa {allLogs.length} kabuuang talaan (walang nawawala)
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowAllLogsModal(false)}
+                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+              >
+                Isara (Close)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

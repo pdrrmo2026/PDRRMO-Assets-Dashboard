@@ -114,6 +114,16 @@ export interface ACDVPersonnel {
   address: string;
 }
 
+export interface ActivityLog {
+  id: string;
+  type: 'equipment' | 'vehicle' | 'personnel' | 'acdv';
+  action: 'Added' | 'Updated' | 'Deleted';
+  name: string;
+  agency?: string;
+  date: string;
+  timestamp?: number;
+}
+
 export const HADR_TEAMS = [
   'Incident Management Teams (IMT)',
   'RDANA',

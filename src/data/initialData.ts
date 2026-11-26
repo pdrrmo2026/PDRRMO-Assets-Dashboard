@@ -660,54 +660,6 @@ export const initialPersonnel: Personnel[] = [
     "dateAdded": "2026-07-01"
   },
   {
-    "id": "823741de-b168-4932-bb37-6235aedf2e05",
-    "name": "Sgt Jessie A Zarza ",
-    "position": "Other",
-    "agency": "IB_80TH",
-    "contact": "",
-    "trainings": [
-      "Water / Flood Search and Rescue Teams",
-      "EARTHQUAKE LANDSLIDE SEARCH & RESCUE TRNG"
-    ],
-    "status": "Active",
-    "hadrTeam": [
-      "Water / Flood Search and Rescue Teams",
-      "Urban Search and Rescue (USAR) Team"
-    ],
-    "dateAdded": "2026-07-01"
-  },
-  {
-    "id": "a395db6f-4955-493f-acf1-64e3ab2bfee9",
-    "name": "SSg Miguel C Wong Jr ",
-    "position": "Other",
-    "agency": "IB_80TH",
-    "contact": "",
-    "trainings": [
-      "EARTHQUAKE LANDSLIDE SEARCH & RESCUE TRNG"
-    ],
-    "status": "Active",
-    "hadrTeam": [
-      "Urban Search and Rescue (USAR) Team"
-    ],
-    "dateAdded": "2026-07-01"
-  },
-  {
-    "id": "877b1d77-051c-4f3f-9828-9678b2eafee2",
-    "name": "Sgt Richard J Requilino ",
-    "position": "Other",
-    "agency": "IB_80TH",
-    "contact": "",
-    "trainings": [
-      "DISASTER RESPONSE OPNS TRNG ",
-      "COMBAT LIFE SAVER TRAINING "
-    ],
-    "status": "Active",
-    "hadrTeam": [
-      "Generalist SRR"
-    ],
-    "dateAdded": "2026-07-01"
-  },
-  {
     "id": "3c5f6fdb-1bbd-476c-9c2a-e35d81e061ba",
     "name": "Cpl Leonilo C Villaruel Jr",
     "position": "Other",
@@ -1191,7 +1143,8 @@ export const initialPersonnel: Personnel[] = [
     ],
     "status": "Active",
     "hadrTeam": [
-      "Urban Search and Rescue (USAR) Team"
+      "Urban Search and Rescue (USAR) Team",
+      "Generalist SRR"
     ],
     "dateAdded": "2026-07-01"
   },
