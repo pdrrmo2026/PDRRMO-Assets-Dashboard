@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ACDV, RIZAL_LGUS, LGUCode } from '../types';
 
-const EDIT_PASSWORD = 'pdrrmo0926';
+const ADMIN_PASSWORDS = ['pdrrmo0926', 'rizal0926'];
 
 interface ACDVListProps {
   acdvData: ACDV[];
@@ -28,12 +28,12 @@ function PasswordModal({ isOpen, onClose, onConfirm, title = "Authentication Req
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === EDIT_PASSWORD) {
+    if (ADMIN_PASSWORDS.includes(password.trim())) {
       setError('');
       setPassword('');
       onConfirm();
     } else {
-      setError('Incorrect password');
+      setError('Incorrect admin password');
     }
   };
 
@@ -50,12 +50,13 @@ function PasswordModal({ isOpen, onClose, onConfirm, title = "Authentication Req
           </div>
         </div>
         
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} autoComplete="off">
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter password"
+            placeholder="Enter admin password"
+            autoComplete="new-password"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-2 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
             autoFocus
           />

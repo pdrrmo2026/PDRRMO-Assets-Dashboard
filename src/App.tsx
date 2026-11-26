@@ -38,12 +38,24 @@ function getInitialData<T>(key: string, baseline: T): T {
 }
 
 export default function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('isLoggedIn') === 'true');
-  const [currentUser, setCurrentUser] = useState<string>(() => localStorage.getItem('currentUser') || '');
-  const [isAdmin, setIsAdmin] = useState(() => localStorage.getItem('isAdmin') === 'true');
-  const [isViewer, setIsViewer] = useState(() => localStorage.getItem('isViewer') === 'true');
-  const [currentUserLguCode, setCurrentUserLguCode] = useState<LGUCode>(() => (localStorage.getItem('currentUserLguCode') as LGUCode) || 'PDRRMO');
+  // Always require typing username and password when opening the link (do NOT retain session)
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [currentUser, setCurrentUser] = useState<string>('');
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isViewer, setIsViewer] = useState(false);
+  const [currentUserLguCode, setCurrentUserLguCode] = useState<LGUCode>('PDRRMO');
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
+
+  // Clear any previously persisted credentials on mount so users must always type
+  useEffect(() => {
+    try {
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('currentUser');
+      localStorage.removeItem('isAdmin');
+      localStorage.removeItem('isViewer');
+      localStorage.removeItem('currentUserLguCode');
+    } catch {}
+  }, []);
 
   // Baseline data loaded immediately from initialData + localStorage cache
   const [equipment, setEquipment] = useState<Equipment[]>(() => getInitialData('pdrrmo_cached_equipment', initialEquipment));
@@ -86,14 +98,6 @@ export default function App() {
   const [showAddPasswordModal, setShowAddPasswordModal] = useState(false);
   const [pendingAddAction, setPendingAddAction] = useState<{ type: 'equipment' | 'vehicle' | 'personnel' | 'acdv', data: any } | null>(null);
 
-  // ── Persist session ──────────────────────────────────────────
-  useEffect(() => {
-    localStorage.setItem('isLoggedIn', String(isLoggedIn));
-    localStorage.setItem('currentUser', currentUser);
-    localStorage.setItem('isAdmin', String(isAdmin));
-    localStorage.setItem('isViewer', String(isViewer));
-    localStorage.setItem('currentUserLguCode', currentUserLguCode);
-  }, [isLoggedIn, currentUser, isAdmin, isViewer, currentUserLguCode]);
 
   // ── Load all data from Supabase on login ─────────────────────
   const loadData = useCallback(async (silent = false) => {
