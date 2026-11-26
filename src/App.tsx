@@ -17,6 +17,25 @@ import {
   fetchPersonnel, insertPersonnel, updatePersonnelInDB, deletePersonnel,
   fetchACDV, insertACDV, updateACDVInDB, deleteACDV,
 } from './lib/db';
+import {
+  initialEquipment,
+  initialVehicles,
+  initialPersonnel,
+  initialACDV,
+} from './data/initialData';
+
+function getInitialData<T>(key: string, baseline: T): T {
+  try {
+    const raw = localStorage.getItem(key);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {
+    console.error('Error reading localStorage for ' + key, e);
+  }
+  return baseline;
+}
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('isLoggedIn') === 'true');
@@ -25,15 +44,43 @@ export default function App() {
   const [isViewer, setIsViewer] = useState(() => localStorage.getItem('isViewer') === 'true');
   const [currentUserLguCode, setCurrentUserLguCode] = useState<LGUCode>(() => (localStorage.getItem('currentUserLguCode') as LGUCode) || 'PDRRMO');
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
-  const [equipment, setEquipment] = useState<Equipment[]>([]);
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [personnel, setPersonnel] = useState<Personnel[]>([]);
-  const [acdvData, setACDVData] = useState<ACDV[]>([]);
+
+  // Baseline data loaded immediately from initialData + localStorage cache
+  const [equipment, setEquipment] = useState<Equipment[]>(() => getInitialData('pdrrmo_cached_equipment', initialEquipment));
+  const [vehicles, setVehicles] = useState<Vehicle[]>(() => getInitialData('pdrrmo_cached_vehicles', initialVehicles));
+  const [personnel, setPersonnel] = useState<Personnel[]>(() => getInitialData('pdrrmo_cached_personnel', initialPersonnel));
+  const [acdvData, setACDVData] = useState<ACDV[]>(() => getInitialData('pdrrmo_cached_acdvData', initialACDV));
+
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [dbOffline, setDbOffline] = useState(false);   // soft offline — shows app with empty data
+  const [dbOffline, setDbOffline] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Sync to local cache whenever state changes
+  useEffect(() => {
+    if (equipment.length > 0) {
+      try { localStorage.setItem('pdrrmo_cached_equipment', JSON.stringify(equipment)); } catch {}
+    }
+  }, [equipment]);
+
+  useEffect(() => {
+    if (vehicles.length > 0) {
+      try { localStorage.setItem('pdrrmo_cached_vehicles', JSON.stringify(vehicles)); } catch {}
+    }
+  }, [vehicles]);
+
+  useEffect(() => {
+    if (personnel.length > 0) {
+      try { localStorage.setItem('pdrrmo_cached_personnel', JSON.stringify(personnel)); } catch {}
+    }
+  }, [personnel]);
+
+  useEffect(() => {
+    if (acdvData.length > 0) {
+      try { localStorage.setItem('pdrrmo_cached_acdvData', JSON.stringify(acdvData)); } catch {}
+    }
+  }, [acdvData]);
 
   // Add confirmation states
   const [showAddPasswordModal, setShowAddPasswordModal] = useState(false);
@@ -68,18 +115,11 @@ export default function App() {
     } catch (err: any) {
       console.error('Failed to load data from Supabase:', err);
       const msg: string = err?.message ?? String(err);
-      const isFetchError = msg.includes('fetch') || msg.includes('network') || msg.includes('abort');
-
-      if (isFetchError) {
-        // Network/timeout error — show app with empty data, auto-retry in background
-        setDbOffline(true);
-        setLoadError(null); // Don't block the app
-        setRetryCount(c => c + 1);
-      } else {
-        // Auth/schema error — show non-blocking banner, still let user see UI
-        setLoadError(msg);
-        setDbOffline(true);
-      }
+      // All errors are non-blocking — show app with whatever data loaded
+      setDbOffline(true);
+      setLoadError(null);
+      setRetryCount(c => c + 1);
+      console.warn('[DB] Will auto-retry. Error:', msg);
     } finally {
       setIsLoading(false);
     }
@@ -90,13 +130,25 @@ export default function App() {
     loadData();
   }, [isLoggedIn, loadData]);
 
-  // Auto-retry with exponential backoff (max 5 attempts, up to 30s apart)
+  // Auto-retry with exponential backoff (max 10 attempts, up to 60s apart)
   useEffect(() => {
-    if (!isLoggedIn || !dbOffline || retryCount === 0 || retryCount > 5) return;
-    const delay = Math.min(5000 * retryCount, 30000);
+    if (!isLoggedIn || !dbOffline || retryCount === 0 || retryCount > 10) return;
+    const delay = Math.min(3000 * retryCount, 60000);
     const timer = setTimeout(() => loadData(true), delay);
     return () => clearTimeout(timer);
   }, [isLoggedIn, dbOffline, retryCount, loadData]);
+
+  // Refresh data when user returns to this browser tab (visibility change)
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadData(true); // silent refresh
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [isLoggedIn, loadData]);
 
   // ── Auth handlers ─────────────────────────────────────────────
   const handleLogin = (username: string, admin: boolean, lguCode: LGUCode, viewer: boolean = false) => {
@@ -257,7 +309,7 @@ export default function App() {
 
   // ── Render ─────────────────────────────────────────────────────
   const renderContent = () => {
-    if (isLoading) {
+    if (isLoading && equipment.length === 0 && vehicles.length === 0 && personnel.length === 0) {
       return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '256px', gap: '16px' }}>
           <div className="spinner" />

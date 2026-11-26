@@ -168,7 +168,7 @@ export default function GISMap({ equipment, vehicles, personnel, acdvData }: GIS
           'TERESA': { lat: 14.5614, lng: 121.1919 },
         };
         const coords = lguCoords[item.agency] || { lat: 14.6091, lng: 121.0223 };
-        
+
         const marker = window.L.marker([coords.lat, coords.lng], { icon: personnelIcon })
           .addTo(map)
           .bindPopup(`
@@ -211,7 +211,7 @@ export default function GISMap({ equipment, vehicles, personnel, acdvData }: GIS
           'TERESA': { lat: 14.5614, lng: 121.1919 },
         };
         const coords = lguCoords[item.registeredLGU] || { lat: 14.6091, lng: 121.0223 };
-        
+
         const marker = window.L.marker([coords.lat, coords.lng], { icon: acdvIcon })
           .addTo(map)
           .bindPopup(`
@@ -232,7 +232,7 @@ export default function GISMap({ equipment, vehicles, personnel, acdvData }: GIS
     }
   }, [equipment, vehicles, personnel, acdvData, showEquipment, showVehicles, showPersonnel, showACDV]);
 
-  const totalMarkers = 
+  const totalMarkers =
     (showEquipment ? equipment.length : 0) +
     (showVehicles ? vehicles.length : 0) +
     (showPersonnel ? personnel.length : 0) +
@@ -256,7 +256,7 @@ export default function GISMap({ equipment, vehicles, personnel, acdvData }: GIS
       <div className="bg-white rounded-xl shadow-sm p-4">
         <div className="flex flex-wrap items-center gap-6">
           <span className="text-sm font-medium text-gray-700">Show on Map:</span>
-          
+
           <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
@@ -313,8 +313,8 @@ export default function GISMap({ equipment, vehicles, personnel, acdvData }: GIS
 
       {/* Map Container */}
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div 
-          ref={mapRef} 
+        <div
+          ref={mapRef}
           className="w-full"
           style={{ background: '#E5E7EB', height: '600px' }}
         >
