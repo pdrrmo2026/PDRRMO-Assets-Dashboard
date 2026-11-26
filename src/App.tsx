@@ -31,6 +31,8 @@ export default function App() {
   const [acdvData, setACDVData] = useState<ACDV[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [dbOffline, setDbOffline] = useState(false);   // soft offline — shows app with empty data
+  const [retryCount, setRetryCount] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Add confirmation states
@@ -47,33 +49,54 @@ export default function App() {
   }, [isLoggedIn, currentUser, isAdmin, isViewer, currentUserLguCode]);
 
   // ── Load all data from Supabase on login ─────────────────────
+  const loadData = useCallback(async (silent = false) => {
+    if (!silent) setIsLoading(true);
+    setLoadError(null);
+    try {
+      const [eq, veh, pers, acdv] = await Promise.all([
+        fetchEquipment(),
+        fetchVehicles(),
+        fetchPersonnel(),
+        fetchACDV(),
+      ]);
+      setEquipment(eq);
+      setVehicles(veh);
+      setPersonnel(pers);
+      setACDVData(acdv);
+      setDbOffline(false);
+      setRetryCount(0);
+    } catch (err: any) {
+      console.error('Failed to load data from Supabase:', err);
+      const msg: string = err?.message ?? String(err);
+      const isFetchError = msg.includes('fetch') || msg.includes('network') || msg.includes('abort');
+
+      if (isFetchError) {
+        // Network/timeout error — show app with empty data, auto-retry in background
+        setDbOffline(true);
+        setLoadError(null); // Don't block the app
+        setRetryCount(c => c + 1);
+      } else {
+        // Auth/schema error — show non-blocking banner, still let user see UI
+        setLoadError(msg);
+        setDbOffline(true);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (!isLoggedIn) return;
-
-    const loadData = async () => {
-      setIsLoading(true);
-      setLoadError(null);
-      try {
-        const [eq, veh, pers, acdv] = await Promise.all([
-          fetchEquipment(),
-          fetchVehicles(),
-          fetchPersonnel(),
-          fetchACDV(),
-        ]);
-        setEquipment(eq);
-        setVehicles(veh);
-        setPersonnel(pers);
-        setACDVData(acdv);
-      } catch (err: any) {
-        console.error('Failed to load data from Supabase:', err);
-        setLoadError(err?.message ?? 'Failed to connect to database. Please check your connection.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     loadData();
-  }, [isLoggedIn]);
+  }, [isLoggedIn, loadData]);
+
+  // Auto-retry with exponential backoff (max 5 attempts, up to 30s apart)
+  useEffect(() => {
+    if (!isLoggedIn || !dbOffline || retryCount === 0 || retryCount > 5) return;
+    const delay = Math.min(5000 * retryCount, 30000);
+    const timer = setTimeout(() => loadData(true), delay);
+    return () => clearTimeout(timer);
+  }, [isLoggedIn, dbOffline, retryCount, loadData]);
 
   // ── Auth handlers ─────────────────────────────────────────────
   const handleLogin = (username: string, admin: boolean, lguCode: LGUCode, viewer: boolean = false) => {
@@ -243,25 +266,6 @@ export default function App() {
       );
     }
 
-    if (loadError) {
-      return (
-        <div style={{ maxWidth: '512px', margin: '48px auto', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '12px', padding: '24px', textAlign: 'center' }}>
-          <span style={{ fontSize: '40px' }}>⚠️</span>
-          <h2 style={{ color: '#b91c1c', fontSize: '20px', fontWeight: 'bold', marginTop: '12px' }}>Database Connection Error</h2>
-          <p style={{ color: '#dc2626', marginTop: '8px', fontSize: '14px' }}>{loadError}</p>
-          <p style={{ color: '#6b7280', fontSize: '12px', marginTop: '12px' }}>
-            Tiyaking na-run na ang SQL migration sa Supabase dashboard at tama ang mga keys sa .env file.
-          </p>
-          <button
-            onClick={() => window.location.reload()}
-            style={{ marginTop: '16px', padding: '8px 24px', background: '#dc2626', color: '#ffffff', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: '600' }}
-          >
-            Retry
-          </button>
-        </div>
-      );
-    }
-
     switch (activeTab) {
       case 'dashboard':
         return <Dashboard equipment={equipment} vehicles={vehicles} personnel={personnel} />;
@@ -334,6 +338,28 @@ export default function App() {
       />
 
       <main className="main-content">
+        {/* Non-blocking DB offline banner — auto-retrying in background */}
+        {dbOffline && !isLoading && (
+          <div style={{
+            background: '#fff7ed', borderBottom: '2px solid #fed7aa',
+            padding: '10px 20px', display: 'flex', alignItems: 'center',
+            justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px',
+            fontSize: '13px', color: '#92400e'
+          }}>
+            <span>
+              ⚠️ <strong>Database connection issue.</strong>&nbsp;
+              {retryCount <= 5
+                ? `Auto-retrying... (attempt ${retryCount}/5). Dashboard shows last loaded data.`
+                : 'Could not reach database. Check your internet or Supabase project status.'}
+            </span>
+            <button
+              onClick={() => loadData()}
+              style={{ padding: '4px 16px', background: '#ea580c', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '600', fontSize: '12px' }}
+            >
+              🔄 Retry Now
+            </button>
+          </div>
+        )}
         <div style={{ padding: '24px' }}>
           {renderContent()}
         </div>
